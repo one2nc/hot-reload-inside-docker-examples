@@ -1,5 +1,0 @@
-Id,Grade,Description
-1,A,finalScore > 70
-2,B,finalScore >= 50 && finalScore < 70
-3,C,finalScore >= 35 && finalScore < 50
-4,F,finalScore < 35
