@@ -139,7 +139,7 @@ Follow the commands to run docker-compose file
 
 > $ docker-compose up -d
 
-If you're running `doker-compose up -d` command for time, It would take 7-10 minutes to pull images(
+If you're running `docker-compose up -d` command for time, It would take 7-10 minutes to pull images(
 openjdk:11) and download dependencies. If everything runs successfully, By doing `docker ps` you
 would see the following outcome.
 
