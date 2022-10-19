@@ -15,8 +15,7 @@ services:
     volumes:
       - ./:/app
     command: ./mvnw spring-boot:run
-    expose:
-      - 8000
+
   db:
     container_name: login-app-db
     image: postgres:14.1-alpine

@@ -16,8 +16,7 @@ services:
     volumes:
       - ./:/app
     command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
-    expose:
-      - 8000
+
   db:
     container_name: login-app-db
     image: postgres:14.1-alpine
