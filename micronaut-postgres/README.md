@@ -61,7 +61,7 @@ services:
     image: <image-name-of-your-application>
     container_name: <container-name>
     networks:
-      - <network-name>
+      - student-grading-network
     build:
       context: .
     env_file: .env
@@ -71,11 +71,10 @@ services:
       - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
     volumes:
       - ./:/app
-    #command to run micronaut application
-    command: ./mvnw mn:run -Dmn.watch=true
+    command: ./mvnw mn:run
 
   db:
-    container_name: <db-service-container-name>
+    container_name: student-grading-db
     image: postgres:14.1-alpine
     env_file: .env
     environment:
@@ -85,15 +84,16 @@ services:
     ports:
       - ${DB_PORT_ON_DOCKER_HOST}:${DB_PORT_ON_CONTAINER}
     volumes:
-      - <volume-nam-on-docker-host>:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
     networks:
-      - <network-name>
+      - student-grading-network
+
 
 volumes:
-  <volume-name-on-docker-host>:
+  db:
 
 networks:
-  <network-name>:
+  student-grading-network:
 
  ```
 
@@ -283,7 +283,7 @@ networks:
 ### Run application in Debug mode
 
 ```
-docker-compose -f dokcer-compose-debug.yml up
+docker-compose -f docker-compose-debug.yml up
 ```
 
 To ensure application running in Debug mode, You're able to see the

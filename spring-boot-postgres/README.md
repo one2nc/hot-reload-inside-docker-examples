@@ -281,7 +281,7 @@ networks:
 ### Run application in Debug mode
 
 ```
-docker-compose -f dokcer-compose-debug.yml up
+docker-compose -f docker-compose-debug.yml up
 ```
 
 To ensure application running in Debug mode, You're able to see the
