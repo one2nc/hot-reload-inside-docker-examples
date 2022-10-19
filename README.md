@@ -2,7 +2,7 @@
 
 A list of sample applications to set up Fast Local Development Environment with Docker.
 
-![](fast.png)
+<img src="./fast.png" alt="" width="300" height="300">
 
 ### What do we mean by Fast Local Development?
 
@@ -17,9 +17,9 @@ functionalities:
 ## Samples of Hot Reload Inside Docker application with multiple integrated services
 
 - [`Spring-Boot / Postgres`](https://github.com/RamanaReddy0M/hot-reload-inside-docker-examples/tree/master/spring-boot-postgres)
-  - Sample Java application with Spring Framework and a Postgres database.
+    - Sample Java application with Spring Framework and a Postgres database.
 - [`Micronaut / Postgres`](https://github.com/RamanaReddy0M/hot-reload-inside-docker-examples/tree/master/micronaut-postgres)
-  - Sample Java application with Micronaut Framework and a Postgres database.
+    - Sample Java application with Micronaut Framework and a Postgres database.
 
 ## Running a sample
 
