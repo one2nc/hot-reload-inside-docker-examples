@@ -125,6 +125,21 @@ to take care of few things like -
 - Finally, for hot reloading of the app inside docker, our current directory(where the source code exists)
   should be mounted to working directory inside container.
 
+### How to pass values to variables in `docker-compose.yml` file?
+
+In this `docker-compose.yml` file, You would see that the variables used
+like `${APPLICATION_PORT_ON_DOCKER_HOST}`, `${APPLICATION_PORT_ON_CONTAINER}`,  
+`${DB_NAME}`, `${POSTGRES_USER}`, `${POSTGRES_PASSWORD}`, `${DB_PORT_ON_DOCKER_HOST}`
+and `${DB_PORT_ON_CONTAINER}`. One might think(people new to docker) that how would we pass values
+to
+these variables? Well there are a couple of ways to do that, One is by defining under
+the `environment`. Other way is to
+define all these values
+inside [.env](./.env)
+file, And then map it to service with the property `env_file` as we did in
+both `<application-name-as-service>` and `db` services.
+
+
 Follow the commands to run docker-compose file
 
 1. Change directory in Terminal or CMD to `<working-dir>`
