@@ -80,9 +80,9 @@ CMD ["./mvnw", "spring-boot:run"]
 ```yaml
 version: '3.8'
 services:
-  <application-name-as-service>:
-    image: <image-name-of-applciation>
-    container_name: <container-name>
+  <your-application-name-as-service>:
+    image: <your-image-name>
+    container_name: <your-container-name>
     networks:
       - spring-boot-postgres-network
     build:
@@ -92,18 +92,15 @@ services:
       - db
     ports:
       - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
+      - ${DEBUG_PORT_ON_DOCKER_HOST}:${DEBUG_PORT_ON_CONTAINER}
     volumes:
       - ./:/app
-    command: ./mvnw spring-boot:run
+    command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
 
   db:
-    container_name: login-app-db
+    container_name: spring-boot-postgres-db
     image: postgres:14.1-alpine
     env_file: .env
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - ${DB_PORT_ON_DOCKER_HOST}:${DB_PORT_ON_CONTAINER}
     volumes:
@@ -121,9 +118,9 @@ networks:
 Here each service acts as new container. Since our application is dependent on `db` service, We need
 to take care of few things like -
 
-- `<application-name-as-service>` service shouldn't start before `db` service. And that is why we
-  used `depend_on` property under `<application-name-as-service>`.
-- `<application-name-as-service>` service and `db` both has to be on the same network. So that they
+- `<your-application-name-as-service>` service shouldn't start before `db` service. And that is why we
+  used `depend_on` property under `<your-application-name-as-service>`.
+- `<your-application-name-as-service>` service and `db` both has to be on the same network. So that they
   can communicate each other. If we don't provide any network to services, They might run in
   isolated networks which leads to communication link failure b/w application and database.
 - Finally, To happen hot reload inside docker, Our current directory(where the source code exists)
@@ -218,72 +215,3 @@ in `pom.xml`.
 Once the dependencies mounted or downloaded, You would see the following logs as good sign -
 
 ![Test-Logs](./src/main/resources/images/docker-compose-test-logs.png)
-
-## Debugging
-
-To run application in Debug mode with docker add the `docker-compose-debug.yml` to the working directory. The project structure is:
-```
-<working-dir>
-├── ...
-├── src
-|     └── ...
-├── Dockerfile
-├── docker-compose.yml
-├── docker-compose-test.yml
-├── docker-compose-debug.yml
-└── README.md
-```
-
-[docker-compose-debug.yml](./docker-compose-debug.yml)
-
-```yaml
-version: '3.8'
-services:
-  <application-name-as-service>:
-    image: <image-name-of-applciation>
-    container_name: <container-name>
-    networks:
-      - spring-boot-postgres-network
-    build:
-      context: .
-    env_file: .env
-    depends_on:
-      - db
-    ports:
-      - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
-      - ${DEBUG_PORT_ON_DOCKER_HOST}:${DEBUG_PORT_ON_CONTAINER}
-    volumes:
-      - ./:/app
-    command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
-
-  db:
-    container_name: login-app-db
-    image: postgres:14.1-alpine
-    env_file: .env
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - ${DB_PORT_ON_DOCKER_HOST}:${DB_PORT_ON_CONTAINER}
-    volumes:
-      - db:/var/lib/postgresql/data
-    networks:
-      - spring-boot-postgres-network
-
-volumes:
-  db:
-
-networks:
-  spring-boot-postgres-network:
-```
-
-### Run application in Debug mode
-
-```
-docker-compose -f docker-compose-debug.yml up
-```
-
-To ensure application running in Debug mode, You're able to see the
-log `Listening for transport dt_socket at address: 8000` before application logo starts.
-

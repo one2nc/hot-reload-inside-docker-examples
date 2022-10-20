@@ -12,18 +12,15 @@ services:
       - db
     ports:
       - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
+      - ${DEBUG_PORT_ON_DOCKER_HOST}:${DEBUG_PORT_ON_CONTAINER}
     volumes:
       - ./:/app
-    command: ./mvnw spring-boot:run
+    command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
 
   db:
     container_name: login-app-db
     image: postgres:14.1-alpine
     env_file: .env
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - ${DB_PORT_ON_DOCKER_HOST}:${DB_PORT_ON_CONTAINER}
     volumes:
