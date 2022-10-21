@@ -10,17 +10,28 @@ By doing `docker-compose up` inside working directory you should be able to run 
 application. The app is compiled in docker. Your code changes will be automatically compiled and hot reloaded without
 having to restart the app or docker container.
 
-### Prerequisites
+## Prerequisites
 
 - Make sure that you have Docker and Docker-Compose installed
-  - Windows or macOS: [Install Docker Desktop](https://www.docker.com/get-started/)
-  - Linux: [Install Docker](https://www.docker.com/get-started/) and
-    then [Docker Compose](https://github.com/docker/compose)
+    - Windows or macOS: [Install Docker Desktop](https://www.docker.com/get-started/)
+    - Linux: [Install Docker](https://www.docker.com/get-started/) and
+      then [Docker Compose](https://github.com/docker/compose)
 
+## Caution!
+
+To achieve hot reload inside docker, You just need to add Dockerfile and Docker-Compose file to the
+existing project. But it isn't straight forward in case of Spring-Boot application. We need to
+perform additional check i.e, Does hot reload works locally?
+
+Quick answer to happen hot reload locally for a Spring-Boot application is to
+have `spring-boot-devtools` dependency
+inside `pom.xl`.
 
 ## Spring-Boot + Postgres + Docker
 
-Before going to take a look at templates of Docker and Docker-Compose file, You first need to
+### Step-1:
+
+Ensure that hot reload works locally, For that we need to
 add `spring-boot-devtools` dependency to `pom.xml` Which help to re-run the application when the
 changes detected.
 
@@ -33,15 +44,23 @@ changes detected.
 </dependency>
 ```
 
-> Note: If you're using intellij, After adding `devtools` dependency enable two properties
+> __Note__: If you're using intellij, After adding `devtools` dependency enable two properties
 > named `Build project automatically`
-> and `Allow auto-make to start even if developed application is currently running` as shown.
+> and `Allow auto-make to start even if developed application is currently running` by navigating to
+> Preferences of intellij as shown.
 
 ![intellij-build-setting](./src/main/resources/images/intellij-build-setting.png)
 
 ![intellij-setting](./src/main/resources/images/intellij-hot-relaod-setting.png)
 
-Then, Add `Dockerfile` and `docker-compose.yml` to the working directory.
+After applying these changes run the application. Now, While the application is up and running, Do
+some Changes to your code base and you would see in the console that the application is
+automatically restarted
+without hitting run button.
+
+### Step-2:
+
+Add `Dockerfile` and `docker-compose.yml` to the working directory.
 
 Project structure after adding `Dockerfile` and `docker-compose.yml`
 
@@ -52,9 +71,11 @@ Project structure after adding `Dockerfile` and `docker-compose.yml`
 |     └── ...
 ├── Dockerfile
 ├── docker-compose.yml
-├── docker-compose-test.yml
 └── README.md
 ```
+
+Now, Copy the content of bellowed `Dockerfile` and `docker-compose.yml` file and paste it into newly
+created __Dockerfile__ and __docker-compose.yml__ files in your project.
 
 ### Templates of Dockerfile and Docker-Compose
 
@@ -114,9 +135,11 @@ networks:
   spring-boot-postgres-network:
 ```
 
+> __NOTE__: Replace `<tags>` a/c to your application name.
+
+
 Here each service acts as new container. Since our application is dependent on `db` service, We need
 to take care of few things like -
-
 - `<your-application-name-as-service>` service shouldn't start before `db` service. And that is why we
   used `depends_on` property under `<your-application-name-as-service>`.
 - `<your-application-name-as-service>` service and `db` both has to be on the same network. So that they
@@ -124,21 +147,42 @@ to take care of few things like -
   isolated networks which leads to communication link failure between application and database.
 - Finally, for hot reloading of the app inside docker, our current directory(where the source code exists)
   should be mounted to working directory inside container.
+```yaml
+    volumes:
+      - ./:/app
+```
 
-### How to pass values to variables in `docker-compose.yml` file?
+### Step-3:
 
 In this `docker-compose.yml` file, You would see that the variables used
 like `${APPLICATION_PORT_ON_DOCKER_HOST}`, `${APPLICATION_PORT_ON_CONTAINER}`,  
-`${DB_NAME}`, `${POSTGRES_USER}`, `${POSTGRES_PASSWORD}`, `${DB_PORT_ON_DOCKER_HOST}`
 and `${DB_PORT_ON_CONTAINER}`. One might think(people new to docker) that how would we pass values
 to
-these variables? Well there are a couple of ways to do that, One is by defining under
-the `environment`. Other way is to
+these variables? Well there are different ways to do that, One is by defining under
+the `environment` property of any service. Other way is to
 define all these values
-inside [.env](./.env)
-file, And then map it to service with the property `env_file` as we did in
-both `<application-name-as-service>` and `db` services.
+inside [.env](./.env).
 
+Here, We'll be using `.env` file to pass values to these variables.
+
+Create a [`.env`](./.env) file inside the working directory.
+
+Then the project structure is:
+
+```
+<working-dir>
+├── ...
+├── src
+|     └── ...
+├── .env
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
+```
+
+Replace the content of newly created `.env` file with this [.env](./.env) file.
+
+### Step-4:
 
 Follow the commands to run docker-compose file
 
@@ -148,7 +192,7 @@ Follow the commands to run docker-compose file
 
 2. Run the `docker-compose.yml` file.
 
-> $ docker-compose up -d
+> $ docker-compose up
 
 If you're running `docker-compose up -d` command for the first time, it would take 7-10 minutes to pull images(
 postgres and openjdk:11) and download dependencies. If everything runs successfully, By doing `docker ps` you
@@ -170,7 +214,8 @@ To run End-To-End(E2E) tests, we need to mock the server and database. One way t
 using
 [test containers](https://www.testcontainers.org/).
 
-Add `docker-compose-test.yml` file would help to run test inside docker. Then the project structure is:
+Add `docker-compose-test.yml` file would help to run test inside docker. Then the project structure
+is:
 
 ```
 <working-dir>
@@ -208,8 +253,6 @@ services:
 
 Here `~/.m2` is specific to mac, If you're using different platform, Replace `~/.m2`
 with `C:\Users\{your-username}\.m2` for windows or `/root/.m2` for linux.
-
-
 
 Follow the command to run tests inside docker.
 
