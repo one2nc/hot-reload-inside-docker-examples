@@ -1,8 +1,16 @@
 # hot-reload-inside-docker-examples
 
+Use this repo to set up a fast local dev env in docker with debugger. Using this repo, you can set up a Spring Boot or 
+Micronaut application with following features:
+  - application built inside docker
+  - code changes auto-compiled and updated without having to restart the app or container
+  - remote debugging using IntelliJIdea
+  - integration test execution using TestContainers in docker
+
 A list of sample applications to set up Fast Local Development Environment with Docker.
 
 <img src="./fast.png" alt="" width="300" height="300">
+
 
 ### What do we mean by Fast Local Development?
 

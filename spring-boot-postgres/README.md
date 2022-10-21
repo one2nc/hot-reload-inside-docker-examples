@@ -2,14 +2,13 @@
 
 ### Use with Docker Development Environment
 
-    A sample application to set up fast local development with hot reload inside docker.
+    A sample application to set up fast local development with hot reload and debugger inside docker.
 
 ## Outcome
 
-By doing `docker-compose up` inside working directory one should be able to run the Micronaut
-application.
-Not just that, While your application is running, Make changes inside source directory, And then you
-would see that the changes automatically reflected inside docker.
+By doing `docker-compose up` inside working directory you should be able to run the Spring Boot
+application. The app is compiled in docker. Your code changes will be automatically compiled and hot reloaded without
+having to restart the app or docker container.
 
 ### Prerequisites
 
@@ -119,11 +118,11 @@ Here each service acts as new container. Since our application is dependent on `
 to take care of few things like -
 
 - `<your-application-name-as-service>` service shouldn't start before `db` service. And that is why we
-  used `depend_on` property under `<your-application-name-as-service>`.
+  used `depends_on` property under `<your-application-name-as-service>`.
 - `<your-application-name-as-service>` service and `db` both has to be on the same network. So that they
   can communicate each other. If we don't provide any network to services, They might run in
-  isolated networks which leads to communication link failure b/w application and database.
-- Finally, To happen hot reload inside docker, Our current directory(where the source code exists)
+  isolated networks which leads to communication link failure between application and database.
+- Finally, for hot reloading of the app inside docker, our current directory(where the source code exists)
   should be mounted to working directory inside container.
 
 Follow the commands to run docker-compose file
@@ -132,12 +131,12 @@ Follow the commands to run docker-compose file
 
 > $ cd `<PATH-TO-WORKING-DIR>`
 
-2. Run the `docker-compose-test.yml` file.
+2. Run the `docker-compose.yml` file.
 
 > $ docker-compose up -d
 
-If you're running `docker-compose up -d` command for time, It would take 7-10 minutes to pull images(
-openjdk:11) and download dependencies. If everything runs successfully, By doing `docker ps` you
+If you're running `docker-compose up -d` command for the first time, it would take 7-10 minutes to pull images(
+postgres and openjdk:11) and download dependencies. If everything runs successfully, By doing `docker ps` you
 would see the following outcome.
 
 ```
@@ -147,14 +146,12 @@ CONTAINER ID   IMAGE                             COMMAND                  CREATE
 04a7dbf0c0e3   postgres:14.1-alpine              "docker-entrypoint.s…"   4 minutes ago    Up 4 minutes    5432/tcp                 student-grading-db
 ```
 
-If application is failed to start, You would still figure why it fails by following below command.
+If application is failed to start, You would need to figure why it failed by observing the logs.
 > $ docker logs --follow `<container-name>`
-
-Make actions a/c to logs.
 
 ## How to run E2E tests inside docker?
 
-To run End-To-End(E2E) tests, We need to mock the server and database. One way to do that is by
+To run End-To-End(E2E) tests, we need to mock the server and database. One way to do that is by
 using
 [test containers](https://www.testcontainers.org/).
 
