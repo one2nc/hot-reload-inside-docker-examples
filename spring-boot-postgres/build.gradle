@@ -45,6 +45,6 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-//bootRun {
-//	jvmArgs=["-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8000"]
-//}
+bootRun {
+	jvmArgs=["-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8000"]
+}
