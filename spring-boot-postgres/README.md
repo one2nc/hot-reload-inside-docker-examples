@@ -2,11 +2,11 @@
 
 ### Use with Docker Development Environment
 
-    A sample application to set up fast local development with hot reload and debugger inside docker.
+     A sample SpringBoot application to set up fast local development with hot reload and debugger inside docker.
 
 ## Outcome
 
-By doing `docker-compose up` inside working directory you should be able to run the Spring Boot
+By doing `docker-compose up` inside working directory you should be able to run the SpringBoot
 application. The app is compiled in docker. Your code changes will be automatically compiled and hot reloaded without
 having to restart the app or docker container.
 
@@ -17,26 +17,30 @@ having to restart the app or docker container.
     - Linux: [Install Docker](https://www.docker.com/get-started/) and
       then [Docker Compose](https://github.com/docker/compose)
 
-## Caution!
+```
+NOTE:
 
-To achieve hot reload inside docker, You just need to add Dockerfile and Docker-Compose file to the
-existing project. But it isn't straight forward in case of Spring-Boot application. We need to
-perform additional check i.e, Does hot reload works locally?
+To achieve hot reload inside docker, you just need to add Dockerfile and docker-compose.yml file to the
+existing project. But it isn't straight forward in case of SpringBoot application. You need to
+perform additional check i.e does hot reload works locally?
 
-Quick answer to happen hot reload locally for a Spring-Boot application is to
+For hot reload to work in a SpringBoot application you need to
 have `spring-boot-devtools` dependency
-inside `pom.xl`.
+inside `pom.xml`.
 
-## Spring-Boot + Postgres + Docker
+```
+
+
+## SpringBoot + Postgres + Docker
 
 ### Step-1:
 
-Ensure that hot reload works locally, For that we need to
-add `spring-boot-devtools` dependency to `pom.xml` Which help to re-run the application when the
-changes detected.
+To ensure that hot reload works locally, we need to
+add `spring-boot-devtools` dependency to `pom.xml` which helps to re-run the application when the
+changes are detected.
 
+Adll the below dependency to pom.xml.
 ```xml
-
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-devtools</artifactId>
@@ -44,17 +48,16 @@ changes detected.
 </dependency>
 ```
 
-> __Note__: If you're using intellij, After adding `devtools` dependency enable two properties
+> __Note__: If you're using IntelliJ, after adding `devtools` dependency you need to enable two properties
 > named `Build project automatically`
-> and `Allow auto-make to start even if developed application is currently running` by navigating to
-> Preferences of intellij as shown.
+> and `Allow auto-make to start even if developed application is currently running` as shown in the figures below.
 
 ![intellij-build-setting](./src/main/resources/images/intellij-build-setting.png)
 
 ![intellij-setting](./src/main/resources/images/intellij-hot-relaod-setting.png)
 
-After applying these changes run the application. Now, While the application is up and running, Do
-some Changes to your code base and you would see in the console that the application is
+After applying these changes run your application. After the application is up and running, do
+some changes to your code base, and then you can see in the console that the application is
 automatically restarted
 without hitting run button.
 
@@ -74,7 +77,7 @@ Project structure after adding `Dockerfile` and `docker-compose.yml`
 └── README.md
 ```
 
-Now, Copy the content of bellowed `Dockerfile` and `docker-compose.yml` file and paste it into newly
+Now, copy the content from template  `Dockerfile` and `docker-compose.yml` files provided below and paste it into newly
 created __Dockerfile__ and __docker-compose.yml__ files in your project.
 
 ### Templates of Dockerfile and Docker-Compose
@@ -96,6 +99,8 @@ CMD ["./mvnw", "spring-boot:run"]
 ```
 
 [docker-compose.yml](./docker-compose.yml)
+
+Below is the template of your docker-compose.yml, the text present in tags(<>) needs to be replaced by you as per your application name.
 
 ```yaml
 version: '3.8'
@@ -135,16 +140,14 @@ networks:
   spring-boot-postgres-network:
 ```
 
-> __NOTE__: Replace `<tags>` a/c to your application name.
+Here each service acts as a new container. Since our application is dependent on `db` service, we need
+to take care of few things:
 
-
-Here each service acts as new container. Since our application is dependent on `db` service, We need
-to take care of few things like -
 - `<your-application-name-as-service>` service shouldn't start before `db` service. And that is why we
   used `depends_on` property under `<your-application-name-as-service>`.
-- `<your-application-name-as-service>` service and `db` both has to be on the same network. So that they
-  can communicate each other. If we don't provide any network to services, They might run in
-  isolated networks which leads to communication link failure between application and database.
+- `<your-application-name-as-service>` service and `db` both have to be on the same network, so that they
+  can communicate with each other. If we don't provide any network to services, they might run in
+  isolated networks which leads to communication link failure between application and the database.
 - Finally, for hot reloading of the app inside docker, our current directory(where the source code exists)
   should be mounted to working directory inside container.
 ```yaml
@@ -184,6 +187,43 @@ Replace the content of newly created `.env` file with this [.env](./.env) file.
 
 ### Step-4:
 
+```yaml
+    volumes:
+      - ./:/app
+```
+
+### Step-3:
+
+In the `docker-compose.yml` file, you would see that the variables used
+like `${APPLICATION_PORT_ON_DOCKER_HOST}`, `${APPLICATION_PORT_ON_CONTAINER}`,  
+and `${DB_PORT_ON_CONTAINER}`. One might think(people new to docker) how do we pass values
+to
+these variables? Well there are different ways to do that, one of them is by defining under
+the `environment` property of any service. Other way is to
+define all these values
+inside [.env](./.env).
+
+Here, we'll be using `.env` file to pass values to these variables.
+
+Create a [`.env`](./.env) file inside the working directory.
+
+Then the project structure is:
+
+```
+<working-dir>
+├── ...
+├── src
+|     └── ...
+├── .env
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
+```
+
+Replace the content of newly created `.env` file with this [.env](./.env) file.
+
+### Step-4:
+
 Follow the commands to run docker-compose file
 
 1. Change directory in Terminal or CMD to `<working-dir>`
@@ -194,23 +234,42 @@ Follow the commands to run docker-compose file
 
 > $ docker-compose up
 
-If you're running `docker-compose up -d` command for the first time, it would take 7-10 minutes to pull images(
-postgres and openjdk:11) and download dependencies. If everything runs successfully, By doing `docker ps` you
-would see the following outcome.
+After doing this you may following error:
+
+![intellij-setting](./src/main/resources/images/mvnwerror.png)
+
+To solve this issue, execute the following command:
+
+> chmod u+x ./mvnw
+
+The issue will be solved.
+Again do a `docker-compose up`
+
+If you're running `docker-compose up` command for first time, it may take upto 7-10 minutes to pull
+image(
+openjdk:11) and download dependencies. If everything runs successfully, by doing `docker ps` you
+would see the similar outcome as shown below.
 
 ```
 ➜  student-grading-micronaut ✗ docker ps
 CONTAINER ID   IMAGE                             COMMAND                  CREATED          STATUS          PORTS                                            NAMES
-8247f3b42566   student-grading-micronaut-image   "./mvnw spring-boot:…"   29 seconds ago   Up 25 seconds   0.0.0.0:8080->8080/tcp   student-grading-micronaut-app
+8247f3b42566   student-grading-spring-boot-image   "./mvnw spring-boot:…"   29 seconds ago   Up 25 seconds   0.0.0.0:8080->8080/tcp   student-grading-micronaut-app
 04a7dbf0c0e3   postgres:14.1-alpine              "docker-entrypoint.s…"   4 minutes ago    Up 4 minutes    5432/tcp                 student-grading-db
 ```
 
-If application is failed to start, You would need to figure why it failed by observing the logs.
+If application failed to start, you can still figure why it fails by executing the below command:
 > $ docker logs --follow `<container-name>`
+
+Take actions according to the logs.
+
+Now, while the application is up and running inside docker, make the changes to code base, then you
+would that application running inside docker should restart automatically.
+
+You can also set a debug point, and hit an API that goes to that debug point using Postman, you can see you'll be redirected to IntelliJ and debug your code.
 
 ## How to run E2E tests inside docker?
 
-To run End-To-End(E2E) tests, we need to mock the server and database. One way to do that is by
+To run End-To-End(E2E) tests, We need to mock the server and database. One way to do that is by
 using
 [test containers](https://www.testcontainers.org/).
 
