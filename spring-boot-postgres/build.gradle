@@ -4,41 +4,45 @@ plugins {
 	id 'java'
 }
 
-group = 'com.example'
+group = 'in.login'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
 
 repositories {
 	mavenCentral()
 }
 
+ext {
+	set('testcontainersVersion', "1.17.4")
+}
+
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.7.5'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.liquibase:liquibase-core'
+	implementation 'org.springframework.session:spring-session-core'
+	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
-
-	def junitJupiterVersion = '5.9.0'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.testcontainers:postgresql:1.17.4'
-	testImplementation 'org.testcontainers:junit-jupiter:1.17.4'
-	testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
-	testImplementation "org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion"
-	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
-	testRuntimeOnly 'org.postgresql:postgresql'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:postgresql'
+}
 
-//	lombok
-	compileOnly 'org.projectlombok:lombok:1.18.24'
-	annotationProcessor 'org.projectlombok:lombok:1.18.24'
-	testCompileOnly 'org.projectlombok:lombok:1.18.24'
-	testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
-
-	compileOnly 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.springframework.boot:spring-boot-starter-data-jpa'
-	runtimeOnly 'org.postgresql:postgresql:42.5.0'
-	testCompileOnly 'org.springframework.boot:spring-boot-starter-test'
+dependencyManagement {
+	imports {
+		mavenBom "org.testcontainers:testcontainers-bom:${testcontainersVersion}"
+	}
 }
 
 tasks.named('test') {
@@ -46,5 +50,5 @@ tasks.named('test') {
 }
 
 bootRun {
-	jvmArgs=["-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8000"]
+	jvmArgs=["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000"]
 }

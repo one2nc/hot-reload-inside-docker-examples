@@ -2,13 +2,12 @@ version: '3.8'
 services:
   spring-boot-postgres:
     image: spring-boot-postgres-image
-    container_name: spring-boot-postgres-container
+    container_name: spring-boot-postgres-gradle-container
     networks:
       - spring-boot-postgres-network
     build:
       context: .
       dockerfile: Dockerfile-Gradle
-    working_dir: /app
     env_file: .env
     depends_on:
       - db
@@ -20,7 +19,7 @@ services:
     command: ./gradlew bootRun
 
   db:
-    container_name: login-app-db
+    container_name: postgres-container
     image: postgres:14.1-alpine
     env_file: .env
     ports:
