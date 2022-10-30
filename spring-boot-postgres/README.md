@@ -13,9 +13,9 @@ having to restart the app or docker container.
 ## Prerequisites
 
 - Make sure that you have Docker and Docker-Compose installed
-    - Windows or macOS: [Install Docker Desktop](https://www.docker.com/get-started/)
-    - Linux: [Install Docker](https://www.docker.com/get-started/) and
-      then [Docker Compose](https://github.com/docker/compose)
+  - Windows or macOS: [Install Docker Desktop](https://www.docker.com/get-started/)
+  - Linux: [Install Docker](https://www.docker.com/get-started/) and
+    then [Docker Compose](https://github.com/docker/compose)
 
 ```
 NOTE:
@@ -140,6 +140,7 @@ networks:
   spring-boot-postgres-network:
 ```
 
+
 Here each service acts as a new container. Since our application is dependent on `db` service, we need
 to take care of few things:
 
@@ -150,42 +151,6 @@ to take care of few things:
   isolated networks which leads to communication link failure between application and the database.
 - Finally, for hot reloading of the app inside docker, our current directory(where the source code exists)
   should be mounted to working directory inside container.
-```yaml
-    volumes:
-      - ./:/app
-```
-
-### Step-3:
-
-In this `docker-compose.yml` file, You would see that the variables used
-like `${APPLICATION_PORT_ON_DOCKER_HOST}`, `${APPLICATION_PORT_ON_CONTAINER}`,  
-and `${DB_PORT_ON_CONTAINER}`. One might think(people new to docker) that how would we pass values
-to
-these variables? Well there are different ways to do that, One is by defining under
-the `environment` property of any service. Other way is to
-define all these values
-inside [.env](./.env).
-
-Here, We'll be using `.env` file to pass values to these variables.
-
-Create a [`.env`](./.env) file inside the working directory.
-
-Then the project structure is:
-
-```
-<working-dir>
-├── ...
-├── src
-|     └── ...
-├── .env
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
-
-Replace the content of newly created `.env` file with this [.env](./.env) file.
-
-### Step-4:
 
 ```yaml
     volumes:

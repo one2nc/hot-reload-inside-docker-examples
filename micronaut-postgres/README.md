@@ -2,14 +2,14 @@
 
 ### Use with Docker Development Environment
 
-    A sample application to set up fast local development with hot reload inside docker.
+    A sample Micronaut application to set up fast local development with hot reload inside docker.
 
 ## Outcome
 
 By doing `docker-compose up` inside working directory one should be able to run the Micronaut
 application.
-Not just that, While your application is running, Make changes inside source directory, And then you
-would see that the changes automatically reflected inside docker.
+Not just that, while your application is running, make changes inside source directory, and then you
+would see that the changes are automatically reflected inside docker.
 
 ### Prerequisites
 
@@ -102,10 +102,10 @@ to take care of few things like -
 
 - `<application-name-as-service>` service shouldn't start before `db` service. And that is why we
   used `depend_on` property under `<application-name-as-service>`.
-- `<application-name-as-service>` service and `db` both has to be on the same network. So that they
-  can communicate each other. If we don't provide any network to services, They might run in
+- `<application-name-as-service>` service and `db` both has to be on the same network, so that they
+  can communicate with each other. If we don't provide any network to services, they might run in
   isolated networks which leads to communication link failure b/w application and database.
-- Finally, To happen hot reload inside docker, Our current directory(where the source code exists)
+- Finally, for hot reload to happen inside docker, our current directory(where the source code exists)
   should be mounted to working directory inside container.
 
 ```yaml
@@ -115,16 +115,16 @@ volumes:
 
 ### How to pass values to variables in `docker-compose.yml` file?
 
-In this `docker-compose.yml` file, You would see that the variables used
+In this `docker-compose.yml` file, you would see that the variables are used
 like `${APPLICATION_PORT_ON_DOCKER_HOST}`, `${APPLICATION_PORT_ON_CONTAINER}`,  
 `${DB_NAME}`, `${POSTGRES_USER}`, `${POSTGRES_PASSWORD}`, `${DB_PORT_ON_DOCKER_HOST}`
 and `${DB_PORT_ON_CONTAINER}`. One might think(people new to docker) that how would we pass values
 to
-these variables? Well there are a couple of ways to do that, One is by defining under
+these variables? Well there are a couple of ways to do that, one is by defining under
 the `environment` property of any service(example to refer, under `db` service). Other way is to
 define all these values
 inside [.env](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/.env)
-file, And then map it to service with the property `env_file` as we did in
+file, and then map it to service with the property `env_file` as we did in
 both `<application-name-as-service>` and `db` services.
 
 ### How to run docker-compose file?
@@ -139,9 +139,9 @@ Follow the commands to run docker-compose file
 
 > $ docker-compose up -d
 
-If you're running `docker-compose up -d` command for first time, It would take 7-10 minutes to pull
+If you're running `docker-compose up -d` command for first time, it would take 7-10 minutes to pull
 images(
-openjdk:11) and downloading dependencies. If everything runs successfully, By doing `docker ps` you
+openjdk:11) and downloading dependencies. If everything runs successfully, by doing `docker ps` you
 would see the following outcome.
 
 ```
@@ -151,14 +151,14 @@ CONTAINER ID   IMAGE                             COMMAND                  CREATE
 04a7dbf0c0e3   postgres:14.1-alpine              "docker-entrypoint.s…"   4 minutes ago    Up 4 minutes    5432/tcp                         student-grading-db
 ```
 
-If application is failed to start, You would still figure why it fails by following below command.
+If application fails to start, you would still figure why it fails by following below command.
 > docker logs --follow <container-name>
 
-Make actions a/c to logs.
+Make actions according to the logs.
 
 ## How to run E2E tests inside docker?
 
-To run End-To-End(E2E) tests, We need to mock the server and database. One way to do that is by
+To run End-To-End(E2E) tests, we need to mock the server and database. One way to do that is by
 using
 [test containers](https://www.testcontainers.org/).
 
@@ -198,7 +198,7 @@ services:
     command: mvn clean test
 ```
 
-Here `~/.m2` is specific to mac, If you're using different platform, Replace `~/.m2`
+Here `~/.m2` is specific to mac, if you're using different platform, replace `~/.m2`
 with `C:\Users\{your-username}\.m2` for windows or `/root/.m2` for linux.
 
 
@@ -216,7 +216,7 @@ Follow the command to run tests inside docker.
 If you're not mounting the `.m2` then it would time take to download all the dependencies mentioned
 in `pom.xml`.
 
-Once the dependencies mounted or downloaded, You would see the following logs as good sign -
+Once the dependencies are mounted or downloaded, you would see the following logs as good sign -
 
 ![Test-Logs](./src/main/resources/images/docker-compose-test-logs.png)
 
@@ -286,7 +286,7 @@ networks:
 docker-compose -f docker-compose-debug.yml up
 ```
 
-To ensure application running in Debug mode, You're able to see the
+To ensure application running in Debug mode, you will be able to see the
 log `Listening for transport dt_socket at address: 8000` before application logo starts.
 
 
