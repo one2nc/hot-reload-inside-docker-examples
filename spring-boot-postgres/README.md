@@ -57,7 +57,7 @@ Add the below dependency to `pom.xml`
 `FOR GRADLE PROJECT:`
 
 To ensure that hot reload works locally, we need to
-add `spring-boot-devtools` dependency to `pom.xml` which helps to re-run the application when the
+add `spring-boot-devtools` dependency to `build.gradle` which helps to re-run the application when the
 changes are detected.
 
 Add the below dependency to `build.gradle`
