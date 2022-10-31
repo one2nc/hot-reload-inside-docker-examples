@@ -234,12 +234,11 @@ You can also set a debug point, and hit an API that goes to that debug point usi
 
 ## How to run E2E tests inside docker?
 
-To run End-To-End(E2E) tests, We need to mock the server and database. One way to do that is by
+To run End-To-End(E2E) tests, we need to mock the server and database. One way to do that is by
 using
 [test containers](https://www.testcontainers.org/).
 
-Add `docker-compose-test.yml` file would help to run test inside docker. Then the project structure
-is:
+Adding `docker-compose-test.yml` file helps us in running tests inside docker. Then the project structure looks like this:
 
 ```
 <working-dir>
@@ -275,7 +274,7 @@ services:
     command: mvn clean test
 ```
 
-Here `~/.m2` is specific to mac, If you're using different platform, Replace `~/.m2`
+Here `~/.m2` is specific to mac, if you're using different platform, replace `~/.m2`
 with `C:\Users\{your-username}\.m2` for windows or `/root/.m2` for linux.
 
 Follow the command to run tests inside docker.
@@ -288,9 +287,9 @@ Follow the command to run tests inside docker.
 
 > $ docker-compose -f docker-compose-test.yml up
 
-If you're not mounting the `.m2` then it would time take to download all the dependencies mentioned
+If you're not mounting the `.m2` then it would take time to download all the dependencies mentioned
 in `pom.xml`.
 
-Once the dependencies mounted or downloaded, You would see the following logs as good sign -
+Once the dependencies are mounted or downloaded, you would see the following logs as a good sign -
 
 ![Test-Logs](./src/main/resources/images/docker-compose-test-logs.png)
