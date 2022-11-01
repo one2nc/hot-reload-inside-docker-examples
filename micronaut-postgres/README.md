@@ -3,13 +3,13 @@
 ### Use with Docker Development Environment
 
     A sample Micronaut application to set up fast local development with hot reload inside docker.
+    We will use Maven and Gradle as the build tools for our application.
 
 ## Outcome
 
-By doing `docker-compose up` inside working directory one should be able to run the Micronaut
-application.
-Not just that, while your application is running, make changes inside source directory, and then you
-would see that the changes are automatically reflected inside docker.
+By doing `docker-compose up` inside working directory you should be able to run the Micronaut
+application. The app is compiled in docker. Your code changes will be automatically compiled and hot reloaded without
+having to restart the app or docker container.
 
 ### Prerequisites
 
@@ -21,8 +21,8 @@ would see that the changes are automatically reflected inside docker.
 
 ### Micronaut + Postgres + Docker
 
-### Templates of Dockerfile and Docker-Compose
-
+### Step-1:
+`FOR MAVEN PROJECTS:`
 - Add `Dockerfile` and `docker-compose.yml` file to the working directory. Then the
   project structure would be as shown below.
 
@@ -35,6 +35,26 @@ would see that the changes are automatically reflected inside docker.
 ├── docker-compose.yml
 └── README.md
 ```
+
+Now, copy the content from template  `Dockerfile` and `docker-compose.yml` files provided below and paste it into newly
+created __Dockerfile__ and __docker-compose.yml__ files in your project.
+
+`FOR GRADLE PROJECT:`
+- Add `Dockerfile-Gradle` and `docker-compose-gradle.yml` to the working directory.
+
+```
+<working-dir>
+├── ...
+├── src
+|     └── ...
+├── Dockerfile-Gradle
+├── docker-compose-gradle.yml
+└── README.md
+```
+
+### Template for Dockerfile and docker-compose.yml files
+
+`FOR MAVEN PROJECT:`
 
 [Dockerfile](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/Dockerfile)
 
@@ -57,11 +77,11 @@ CMD ["./mvnw", "mn:run", "-Dmn.watch=true"]
  ```yaml
 version: '3.8'
 services:
-  <application-name-as-service>:
-    image: <image-name-of-your-application>
-    container_name: <container-name>
+  micronaut-postgres:
+    image: micronaut-postgres-image
+    container_name: micronaut-postgres-container
     networks:
-      - student-grading-network
+      - micronaut-postgres-network
     build:
       context: .
     env_file: .env
@@ -97,14 +117,79 @@ networks:
 
  ```
 
+
+`FOR GRADLE PROJECT:`
+
+[Dockerfile-Gradle](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/Dockerfile-Gradle)
+
+```dockerfile
+FROM openjdk:11
+
+WORKDIR /app
+
+COPY gradle gradle
+COPY gradlew build.gradle gradle.properties ./
+COPY src ./src
+
+RUN ./gradlew clean build -x test
+
+CMD ["./gradlew", "run", "-t"]
+
+ ```
+
+[docker-compose-gradle.yml](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/docker-compose.yml)
+
+```yaml
+version: '3.8'
+services:
+  micronaut-postgres:
+    image: micronaut-postgres-image
+    container_name: micronaut-postgres-container
+    networks:
+      - micronaut-postgres-network
+    build:
+      context: .
+      dockerfile: Dockerfile-Gradle
+    env_file: .env
+    depends_on:
+      - db
+    ports:
+      - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
+      - ${DEBUG_PORT_ON_DOCKER_HOST}:${DEBUG_PORT_ON_CONTAINER}
+    volumes:
+      - ./:/app
+    command: ./gradlew run -t
+
+  db:
+    container_name: postgres-container
+    image: postgres:14.1-alpine
+    env_file: .env
+    ports:
+      - ${DB_PORT_ON_DOCKER_HOST}:${DB_PORT_ON_CONTAINER}
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - micronaut-postgres-network
+
+
+volumes:
+  db:
+
+networks:
+  micronaut-postgres-network:
+```
+
+ 
+
+
 Here each service acts as new container. Since our application is dependent on `db` service, We need
 to take care of few things like -
 
-- `<application-name-as-service>` service shouldn't start before `db` service. And that is why we
-  used `depend_on` property under `<application-name-as-service>`.
-- `<application-name-as-service>` service and `db` both has to be on the same network, so that they
+- `micronaut-postgres` service shouldn't start before `db` service. And that is why we
+  used `depend_on` property under `micronaut-postgres`.
+- `micronaut-postgres` service and `db` both have to in the same network, so that they
   can communicate with each other. If we don't provide any network to services, they might run in
-  isolated networks which leads to communication link failure b/w application and database.
+  isolated networks which leads to communication link failure between application and database.
 - Finally, for hot reload to happen inside docker, our current directory(where the source code exists)
   should be mounted to working directory inside container.
 
@@ -113,9 +198,9 @@ volumes:
   - ./:/app
 ```
 
-### How to pass values to variables in `docker-compose.yml` file?
+### How to pass values to variables in `docker-compose.yml` and `docker-compose-gradle.yml` file?
 
-In this `docker-compose.yml` file, you would see that the variables are used
+In the `docker-compose.yml` and `docker-cmompose-gradle.yml` files, you would see that the variables are used
 like `${APPLICATION_PORT_ON_DOCKER_HOST}`, `${APPLICATION_PORT_ON_CONTAINER}`,  
 `${DB_NAME}`, `${POSTGRES_USER}`, `${POSTGRES_PASSWORD}`, `${DB_PORT_ON_DOCKER_HOST}`
 and `${DB_PORT_ON_CONTAINER}`. One might think(people new to docker) that how would we pass values
@@ -125,7 +210,7 @@ the `environment` property of any service(example to refer, under `db` service).
 define all these values
 inside [.env](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/.env)
 file, and then map it to service with the property `env_file` as we did in
-both `<application-name-as-service>` and `db` services.
+both `micronaut-postgres` and `db` services.
 
 ### How to run docker-compose file?
 
@@ -135,11 +220,18 @@ Follow the commands to run docker-compose file
 
 > $ cd `<PATH-TO-WORKING-DIR>`
 
-2. Run the `docker-compose-test.yml` file.
+2. Run the `docker-compose.yml` or `docker-compose-gradle.yml` files depending on the build tool you are using i.e Maven or Gradle.
 
-> $ docker-compose up -d
+`IN CASE OF MAVEN APPLICATION:`
 
-If you're running `docker-compose up -d` command for first time, it would take 7-10 minutes to pull
+> $ docker-compose up
+
+`IN CASE OF GRADLE APPLICATION:`
+
+> $ docker-compose -f docker-compose-gradle.yml up
+
+
+If you're running `docker-compose up` command for first time, it would take 7-10 minutes to pull
 images(
 openjdk:11) and downloading dependencies. If everything runs successfully, by doing `docker ps` you
 would see the following outcome.
@@ -147,7 +239,7 @@ would see the following outcome.
 ```
 ➜  student-grading-micronaut ✗ docker ps
 CONTAINER ID   IMAGE                             COMMAND                  CREATED          STATUS          PORTS                                            NAMES
-8247f3b42566   student-grading-micronaut-image   "./mvnw mn:run -Dmn.…"   29 seconds ago   Up 25 seconds   0.0.0.0:8080->8080/tcp           student-grading-micronaut-app
+8247f3b42566   micronaut-postgres-image          "./mvnw mn:run -Dmn.…"   29 seconds ago   Up 25 seconds   0.0.0.0:8080->8080/tcp           student-grading-micronaut-app
 04a7dbf0c0e3   postgres:14.1-alpine              "docker-entrypoint.s…"   4 minutes ago    Up 4 minutes    5432/tcp                         student-grading-db
 ```
 

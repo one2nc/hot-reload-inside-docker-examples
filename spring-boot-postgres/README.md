@@ -139,8 +139,6 @@ CMD ["./mvnw", "spring-boot:run"]
 
 [docker-compose.yml](./docker-compose.yml)
 
-Below is the template of your docker-compose.yml, the text present in tags(<>) needs to be replaced by you as per your application name.
-
 ```yaml
 version: '3.8'
 services:
