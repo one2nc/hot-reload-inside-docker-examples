@@ -9,6 +9,14 @@ Micronaut application with following features:
   - remote debugging using IntelliJIdea
   - integration test execution using TestContainers in docker
 
+## Prerequisites
+
+- Make sure that you have Docker and Docker-Compose installed
+  - Windows or macOS: [Install Docker Desktop](https://www.docker.com/get-started/)
+  - Linux: [Install Docker](https://www.docker.com/get-started/) and
+    then [Docker Compose](https://github.com/docker/compose)
+
+
 ## Samples of Hot Reload Inside Docker application with multiple integrated services
 
 - [`Spring-Boot / Postgres`](https://github.com/RamanaReddy0M/hot-reload-inside-docker-examples/tree/master/spring-boot-postgres)

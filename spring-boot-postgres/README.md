@@ -11,19 +11,12 @@ By doing `docker-compose up` inside working directory you should be able to run 
 application. The app is compiled in docker. Your code changes will be automatically compiled and hot reloaded without
 having to restart the app or docker container.
 
-## Prerequisites
 
-- Make sure that you have Docker and Docker-Compose installed
-  - Windows or macOS: [Install Docker Desktop](https://www.docker.com/get-started/)
-  - Linux: [Install Docker](https://www.docker.com/get-started/) and
-    then [Docker Compose](https://github.com/docker/compose)
-
-```
 NOTE:
 
-In case of maven project, to achieve hot reload inside docker, you just need to add Dockerfile and docker-compose.yml file to the
+In case of maven project, to achieve hot reload inside docker, you just need to add `Dockerfile` and `docker-compose.yml` file to the
 existing project. 
-In case of gradle project, to achieve hot reload inside docker, you just need to add Dockerfile-Gradle and docker-compose-gradle.yml to the 
+In case of gradle project, to achieve hot reload inside docker, you just need to add `Dockerfile-Gradle` and `docker-compose-gradle.yml` to the 
 existing project.
 But it isn't straight forward in case of SpringBoot application. You need to
 perform additional check i.e does hot reload works locally?
@@ -31,8 +24,6 @@ perform additional check i.e does hot reload works locally?
 For hot reload to work in a SpringBoot application you need to
 have `spring-boot-devtools` dependency
 inside `pom.xml` for Maven project and inside build.gradle for Gradle project.
-
-```
 
 
 ## SpringBoot + Postgres + Docker
@@ -338,7 +329,7 @@ would see the similar outcome as shown below.
 ```
 ➜  student-grading-micronaut ✗ docker ps
 CONTAINER ID   IMAGE                             COMMAND                  CREATED          STATUS          PORTS                                            NAMES
-8247f3b42566   student-grading-spring-boot-image   "./mvnw spring-boot:…"   29 seconds ago   Up 25 seconds   0.0.0.0:8080->8080/tcp   student-grading-micronaut-app
+8247f3b42566   spring-boot-postgres-image        "./mvnw spring-boot:…"   29 seconds ago   Up 25 seconds   0.0.0.0:8080->8080/tcp   student-grading-micronaut-app
 04a7dbf0c0e3   postgres:14.1-alpine              "docker-entrypoint.s…"   4 minutes ago    Up 4 minutes    5432/tcp                 student-grading-db
 ```
 

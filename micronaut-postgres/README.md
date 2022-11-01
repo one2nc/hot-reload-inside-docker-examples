@@ -11,13 +11,6 @@ By doing `docker-compose up` inside working directory you should be able to run 
 application. The app is compiled in docker. Your code changes will be automatically compiled and hot reloaded without
 having to restart the app or docker container.
 
-### Prerequisites
-
-- Make sure that you have Docker and Docker-Compose installed
-    - Windows or macOS: [Install Docker Desktop](https://www.docker.com/get-started/)
-    - Linux: [Install Docker](https://www.docker.com/get-started/) and
-      then [Docker Compose](https://github.com/docker/compose)
-
 
 ### Micronaut + Postgres + Docker
 
@@ -198,6 +191,8 @@ volumes:
   - ./:/app
 ```
 
+### Step-2:
+
 ### How to pass values to variables in `docker-compose.yml` and `docker-compose-gradle.yml` file?
 
 In the `docker-compose.yml` and `docker-cmompose-gradle.yml` files, you would see that the variables are used
@@ -211,6 +206,9 @@ define all these values
 inside [.env](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/.env)
 file, and then map it to service with the property `env_file` as we did in
 both `micronaut-postgres` and `db` services.
+
+
+### Step-3:
 
 ### How to run docker-compose file?
 
@@ -311,74 +309,5 @@ in `pom.xml`.
 Once the dependencies are mounted or downloaded, you would see the following logs as good sign -
 
 ![Test-Logs](./src/main/resources/images/docker-compose-test-logs.png)
-
-## Debugging
-
-To run application in Debug mode with docker add the `docker-compose-debug.yml` to the working directory. The project structure is:
-```
-<working-dir>
-├── ...
-├── src
-|     └── ...
-├── Dockerfile
-├── docker-compose.yml
-├── docker-compose-test.yml
-├── docker-compose-debug.yml
-└── README.md
-```
-
-[docker-compose-debug.yml](./docker-compose-debug.yml)
-
-```yaml
-version: '3.8'
-services:
-  <application-name-as-service>:
-    image: <application-image-name>
-    container_name: student-grading-micronaut-app
-    networks:
-      - student-grading-network
-    build:
-      context: .
-    env_file: .env
-    depends_on:
-      - db
-    ports:
-      - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
-      - ${DEBUG_PORT_ON_DOCKER_HOST}:${DEBUG_PORT_ON_CONTAINER}
-    volumes:
-      - ./:/app
-    command: ./mvnw mn:run -Dmn.debug -Dmn.debug.host=* -Dmn.debug.port=${DEBUG_PORT_ON_CONTAINER}
-
-  db:
-    container_name: student-grading-db
-    image: postgres:14.1-alpine
-    env_file: .env
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - ${DB_PORT_ON_DOCKER_HOST}:${DB_PORT_ON_CONTAINER}
-    volumes:
-      - db:/var/lib/postgresql/data
-    networks:
-      - student-grading-network
-
-
-volumes:
-  db:
-
-networks:
-  student-grading-network:
-```
-
-### Run application in Debug mode
-
-```
-docker-compose -f docker-compose-debug.yml up
-```
-
-To ensure application running in Debug mode, you will be able to see the
-log `Listening for transport dt_socket at address: 8000` before application logo starts.
 
 
