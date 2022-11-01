@@ -7,7 +7,7 @@
 
 ## Outcome
 
-By doing `docker-compose up` inside working directory you should be able to run the Micronaut
+By doing `docker-compose up` inside the working directory you should be able to run the Micronaut
 application. The app is compiled in docker. Your code changes will be automatically compiled and hot reloaded without
 having to restart the app or docker container.
 
@@ -16,7 +16,7 @@ having to restart the app or docker container.
 
 ### Step-1:
 `FOR MAVEN PROJECTS:`
-- Add `Dockerfile` and `docker-compose.yml` file to the working directory. Then the
+- Add `Dockerfile` and `docker-compose.yml` files to the working directory. Then the
   project structure would be as shown below.
 
 ```
@@ -29,7 +29,7 @@ having to restart the app or docker container.
 └── README.md
 ```
 
-Now, copy the content from template  `Dockerfile` and `docker-compose.yml` files provided below and paste it into newly
+Now, copy the content from the template  `Dockerfile` and `docker-compose.yml` files provided below and paste it into newly
 created __Dockerfile__ and __docker-compose.yml__ files in your project.
 
 `FOR GRADLE PROJECT:`
@@ -172,19 +172,19 @@ networks:
   micronaut-postgres-network:
 ```
 
- 
 
 
-Here each service acts as new container. Since our application is dependent on `db` service, We need
-to take care of few things like -
+
+Here each service acts as a new container. Since our application is dependent on `db` service, We need
+to take care of a few things like -
 
 - `micronaut-postgres` service shouldn't start before `db` service. And that is why we
   used `depend_on` property under `micronaut-postgres`.
 - `micronaut-postgres` service and `db` both have to in the same network, so that they
   can communicate with each other. If we don't provide any network to services, they might run in
-  isolated networks which leads to communication link failure between application and database.
+  isolated networks which leads to communication link failure between the application and database.
 - Finally, for hot reload to happen inside docker, our current directory(where the source code exists)
-  should be mounted to working directory inside container.
+  should be mounted to the working directory inside the container.
 
 ```yaml
 volumes:
@@ -201,10 +201,10 @@ like `${APPLICATION_PORT_ON_DOCKER_HOST}`, `${APPLICATION_PORT_ON_CONTAINER}`,
 and `${DB_PORT_ON_CONTAINER}`. One might think(people new to docker) that how would we pass values
 to
 these variables? Well there are a couple of ways to do that, one is by defining under
-the `environment` property of any service(example to refer, under `db` service). Other way is to
+the `environment` property of any service(example to refer, under `db` service). Another way is to
 define all these values
 inside [.env](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/.env)
-file, and then map it to service with the property `env_file` as we did in
+file, and then map it to the service with the property `env_file` as we did in
 both `micronaut-postgres` and `db` services.
 
 
@@ -229,7 +229,7 @@ Follow the commands to run docker-compose file
 > $ docker-compose -f docker-compose-gradle.yml up
 
 
-If you're running `docker-compose up` command for first time, it would take 7-10 minutes to pull
+If you're running `docker-compose up` command for the first time, it would take 7-10 minutes to pull
 images(
 openjdk:11) and downloading dependencies. If everything runs successfully, by doing `docker ps` you
 would see the following outcome.
@@ -241,7 +241,7 @@ CONTAINER ID   IMAGE                             COMMAND                  CREATE
 04a7dbf0c0e3   postgres:14.1-alpine              "docker-entrypoint.s…"   4 minutes ago    Up 4 minutes    5432/tcp                         student-grading-db
 ```
 
-If application fails to start, you would still figure why it fails by following below command.
+If the application fails to start, you would still figure out why it fails by the below command.
 > docker logs --follow <container-name>
 
 Make actions according to the logs.
@@ -252,7 +252,7 @@ To run End-To-End(E2E) tests, we need to mock the server and database. One way t
 using
 [test containers](https://www.testcontainers.org/).
 
-Add `docker-compose-test.yml` file would help to run test inside docker. Then the project structure is:
+Adding `docker-compose-test.yml` file would help to run the test inside docker. Then the project structure is:
 
 ```
 <working-dir>
@@ -295,7 +295,7 @@ with `C:\Users\{your-username}\.m2` for windows or `/root/.m2` for linux.
 
 Follow the command to run tests inside docker.
 
-1. Change directory in Terminal or CMD to `<working-dir>`
+1. Change the directory in Terminal or CMD to `<working-dir>`
 
 > $ cd `<PATH-TO-WORKING-DIR>`
 
@@ -306,7 +306,7 @@ Follow the command to run tests inside docker.
 If you're not mounting the `.m2` then it would time take to download all the dependencies mentioned
 in `pom.xml`.
 
-Once the dependencies are mounted or downloaded, you would see the following logs as good sign -
+Once the dependencies are mounted or downloaded, you would see the following logs as a good sign -
 
 ![Test-Logs](./src/main/resources/images/docker-compose-test-logs.png)
 
