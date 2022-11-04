@@ -40,3 +40,42 @@ output. To stop and remove all containers of the sample application run:
 ```yaml
 docker compose down
 ```
+
+## Explanation
+
+### Key Concepts
+
+- Volume Mapping
+- Gradle / Maven Dependency Caching
+
+### Volume Mapping
+
+The essential component is __mounting__ current directory from local machine to `app`(WORKDIR)
+directory
+inside Docker container. SpringBoot / Micronaut application by default comes with Maven / Gradle
+Wrappers, this would allow us to run the application within Docker container.
+
+### Gradle / Maven Dependency Caching
+
+Mounting current directory into Docker container helps to have source code and the
+build tool within Docker container, but the source code within Docker is dependent on many external
+libraries(dependencies) which are not present in current directory.
+
+There are two ways to solve this issue:
+
+- Mounting `.m2` / `.gradle` from Docker Host to Docker container.
+- Caching all the dependencies while building the Docker image
+
+Mounting root level directories is not an option to choose. But there are some other issue with
+Gradle
+caching, if you are mounting `.gradle` and running the application with Gradle build tool within
+Docker container, then docker acquires lock for gradle cache, that means we
+can't run any application with Gradle build in local machine until Docker container is stopped.
+
+Caching all the dependencies while building Docker image is a good option during development phase.
+Since we are downloading all the dependencies image size would be larger(depends on dependencies).
+
+
+## Remote Debugging Using IntelliJIDEA
+
+https://user-images.githubusercontent.com/90540245/199643735-1462e99f-61ba-4e6b-84f9-6ae60fb3b686.mp4

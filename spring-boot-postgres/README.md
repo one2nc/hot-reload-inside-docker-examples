@@ -5,136 +5,219 @@
      A sample SpringBoot application to set up fast local development with hot reload and debugger inside docker. 
      We will use Maven and Gradle as the build tools for our application.
 
-## Outcome
+## SpringBoot + Postgres + Maven / Gradle + Docker
 
-By doing `docker-compose up` inside the working directory you should be able to run the SpringBoot
-application. The app is compiled in docker. Your code changes will be automatically compiled and hot reloaded without
-having to restart the app or docker container.
-
-
-NOTE:
-
-In the case of a Maven project, to achieve hot reload inside docker, you just need to add the `Dockerfile` and `docker-compose.yml` files to the
-existing project.
-In the case of a Gradle project, to achieve hot reload inside docker, you just need to add the `Dockerfile-Gradle` and `docker-compose-gradle.yml` to the
-existing project.
-But it isn't straightforward in the case of a SpringBoot application. You need to
-perform additional checks i.e does hot reload work locally?
-
-For hot reload to work in a SpringBoot application you need to
-have `spring-boot-devtools` dependency
-inside `pom.xml` for the Maven project and inside build.gradle for Gradle project.
-
-
-## SpringBoot + Postgres + Docker
+## Run Application Inside Docker
 
 ### Step-1:
 
-`FOR MAVEN PROJECT:`
+Ensure working of hot reload in local machine.
+
+__Maven__:
 
 To ensure that hot reload works locally, we need to
 add `spring-boot-devtools` dependency to `pom.xml` which helps to re-run the application when the
 changes are detected.
 
-Add the below dependency to `pom.xml`
-```xml
+````xml
+
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-devtools</artifactId>
     <scope>runtime</scope>
 </dependency>
+````
+
+__Gradle:__
+
+For gradle add `spring-boot-devtools` dependency to `build.gradle` file
+
+```yaml
+developmentOnly 'org.springframework.boot:spring-boot-devtools'
 ```
 
-`FOR GRADLE PROJECT:`
-
-To ensure that hot reload works locally, we need to
-add `spring-boot-devtools` dependency to `build.gradle` which helps to re-run the application when the
-changes are detected.
-
-Add the below dependency to `build.gradle`
-```gradle
-dependencies{
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-}
-```
+__Maven / Gradle:__
+> __Note__: If you're using __IntelliJIDEA__ as development tool, after adding `devtools` dependency
+> enable these properties:
+>
+> 1.Navigate to - __IntelliJIDEA -> Preferences -> Build, Execution, Deployment -> Compiler__ and
+> enable `Build project automatically`.
+>
+> 2.Navigate to - __IntelliJIDEA -> Preferences -> Advanced Settings__ and
+> enable `Allow auto-make to start even if developed application is currently running`.
 
 
-> __Note__: If you're using IntelliJ, after adding `devtools` dependency you need to enable two properties
-> named `Build project automatically`
-> and `Allow auto-make to start even if developed application is currently running` as shown in the figures below.
-
-![intellij-build-setting](./src/main/resources/images/intellij-build-setting.png)
-
-![intellij-setting](./src/main/resources/images/intellij-hot-relaod-setting.png)
-
-After applying these changes run your application. After the application is up and running, do
-some changes to your code base, and then you can see in the console that the application is
-automatically restarted
-without hitting the run button.
+After applying these changes run the application. While application is running, change
+code base by adding some `System.out.println` statement and save the changes. This time code changes
+should be auto-compiled and updated without having to restart the application(hot reload).
 
 ### Step-2:
 
-`FOR MAVEN PROJECT:`
+Create `Dockerfile`, `docker-compose.yml` and `.env`(used to pass values to variables used inside
+docker-compose.yml) inside the working directory.
 
-Add `Dockerfile` and `docker-compose.yml` to the working directory.
-
-Project structure after adding `Dockerfile` and `docker-compose.yml`
+Then project structure is:
 
 ```
 <working-dir>
 ├── ...
 ├── src
 |     └── ...
+├── .env
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
 ```
 
-Now, copy the content from the template  `Dockerfile` and `docker-compose.yml` files provided below and paste it into newly
+__Maven:__
+
+- [Dockerfile](./Dockerfile)
+- [docker-compose.yml](./docker-compose.yml)
+- [.env](./.env)
+
+__Gradle:__
+
+- [Dockerfile](./Dockerfile-Gradle)
+- [docker-compose.yml](docker-compose-gradle.yml)
+- [.env](./.env)
+
+Now, copy the content from `Dockerfile`, `docker-compose.yml`
+and `.env` files (based on build tool) to newly
 created __Dockerfile__ and __docker-compose.yml__ files in your project.
 
-`FOR GRADLE PROJECT:`
+### Step-3:
 
-Add `Dockerfile-Gradle` and `docker-compose-gradle.yml` to the working directory.
+Make appropriate changes in `docker-compose.yml` and `.env` like:
 
-```
-<working-dir>
-├── ...
-├── src
-|     └── ...
-├── Dockerfile-Gradle
-├── docker-compose-gradle.yml
-└── README.md
-```
-
-
-`FOR MAVEN PROJECT:`
-
-#### Templates of Dockerfile and docker-compose
-
-[Dockerfile](./Dockerfile)
-
-```dockerfile
-FROM openjdk:11
-
-WORKDIR /app
-
-COPY .mvn .mvn
-COPY mvnw pom.xml ./
-RUN ./mvnw -T 4 dependency:go-offline
-
-COPY src ./src
-
-CMD ["./mvnw", "spring-boot:run"]
-```
-
-[docker-compose.yml](./docker-compose.yml)
+__docker-compose.yml:__
 
 ```yaml
 version: '3.8'
 services:
+  spring-boot-postgres-maven:
+    image: <your-image-name>
+    container_name: <your-container-name>
+  ....
+```
+
+__.env:__
+
+```
+...
+DB_NAME=<your-db-name>
+...
+```
+
+### Step-4:
+
+__Maven/Gradle:__
+
+Now, run the application inside docker:
+
+Simply do `docker-compose up` inside working directory
+> $ docker-compose up
+
+Then you may get error like `permission denied exception for ./mvnw file`
+or `permission denied exception for ./gradlew file`
+
+To solve this issue, execute the command:
+
+> chmod u+x ./mvnw
+
+Similarly, for gradle do `chmod u+x ./graldew`
+
+Again do a `docker-compose up`, this time you don't get any errors but
+for the first build it may take up to 7-10 minutes to pull
+images(openjdk:11 and postgres:14.1-alpine) and download dependencies. If everything runs
+successfully, by doing `docker ps` you
+would see a similar outcome(image and container names may differ) for __maven / gradle__:
+
+```
+➜  spring-postgres ✗ docker ps
+CONTAINER ID   IMAGE                             COMMAND                  CREATED          STATUS          PORTS                                            NAMES
+8247f3b42566   spring-boot-postgres-image       "./mvnw spring-boot:…"   29 seconds ago   Up 25 seconds   0.0.0.0:8000->8000/tcp, 0.0.0.0:8080->8080/tcp    spring-boot-postgres-container
+04a7dbf0c0e3   postgres:14.1-alpine              "docker-entrypoint.s…"   4 minutes ago    Up 4 minutes    5432/tcp                                          postgres-container
+```
+
+Now, while the application is up and running inside docker, make the changes to the code base, then
+you would see that application running inside docker should restart automatically.
+
+## Debugging
+
+### Maven:
+
+Logs inside docker after doing `docker-compose up`:
+
+```
+.......
+spring-boot-postgres-maven-container  | Listening for transport dt_socket at address: 8000
+spring-boot-postgres-maven-container  | 06:32:14.319 [Thread-0] DEBUG org.springframework.boot.devtools.restart.classloader.RestartClassLoader - Created RestartClassLoader org.springframework.boot.devtools.restart.classloader.RestartClassLoader@4ab3d40a
+spring-boot-postgres-maven-container  | 
+spring-boot-postgres-maven-container  |   .   ____          _            __ _ _
+spring-boot-postgres-maven-container  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+spring-boot-postgres-maven-container  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+spring-boot-postgres-maven-container  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+spring-boot-postgres-maven-container  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+spring-boot-postgres-maven-container  |  =========|_|==============|___/=/_/_/_/
+spring-boot-postgres-maven-container  |  :: Spring Boot ::                (v2.7.5)
+.......
+```
+
+If you observe the log `Listening for transport dt_socket at address: 8000`, that means application
+is running in debug mode at port 8000 inside docker.
+
+Application is running in debug mode because of command inside docker-compose:
+
+__docker-compose.yml__
+
+```yaml
+...
+command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
+...
+```
+
+### Gradle:
+
+In case of gradle to run application in debug mode add `bootRun` task to `build.gradle`:
+
+__bootRun task__:
+```
+bootRun {
+	jvmArgs=["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000"]
+}
+```
+
+After that do `docker-compose up` inside working directory, then the logs inside docker is:
+```
+...
+spring-postgres-gradle-container  | > Task :run
+spring-postgres-gradle-container  | Listening for transport dt_socket at address: 8000
+spring-postgres-gradle-container  | 06:32:14.319 [Thread-0] DEBUG org.springframework.boot.devtools.restart.classloader.RestartClassLoader - Created RestartClassLoader org.springframework.boot.devtools.restart.classloader.RestartClassLoader@4ab3d40a
+spring-postgres-gradle-container  | 
+spring-postgres-gradle-container  |   .   ____          _            __ _ _
+spring-postgres-gradle-container  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+spring-postgres-gradle-container  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+spring-postgres-gradle-container  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+spring-postgres-gradle-container  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+spring-postgres-gradle-container  |  =========|_|==============|___/=/_/_/_/
+spring-postgres-gradle-container  |  :: Spring Boot ::                (v2.7.5)
+.....
+```
+If you observe the log `Listening for transport dt_socket at address: 8000`, that means application is running in debug mode at port 8000 inside docker.
+
+__Maven / Gradle__:
+
+Inside __jvmArgs__ we have used the property `address=*:8000` which tells from where we should attach debugger. Here `*` is
+placed in place of __host__ that means we can attach to debugger from any host within the same network.
+
+Then follow steps in [Remote Debugging Using IntelliJIDEA](https://github.com/one2nc/hot-reload-inside-docker-examples/blob/master/README.md#remote-debugging-using-intellijidea) to attach a debugger.
+
+## Details About Docker-Compose File
+```yaml
+version: '3.8'
+services:
   spring-boot-postgres:
-    image: spring-boot-postgres-image
+    image: spring-boot-postgres-maven-image
     container_name: spring-boot-postgres-maven-container
     networks:
       - spring-boot-postgres-network
@@ -149,70 +232,6 @@ services:
     volumes:
       - ./:/app
     command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
-
-  db:
-    container_name: spring-boot-postgres-db
-    image: postgres:14.1-alpine
-    env_file: .env
-    ports:
-      - ${DB_PORT_ON_DOCKER_HOST}:${DB_PORT_ON_CONTAINER}
-    volumes:
-      - db:/var/lib/postgresql/data
-    networks:
-      - spring-boot-postgres-network
-
-volumes:
-  db:
-
-networks:
-  spring-boot-postgres-network:
-```
-
-
-`FOR GRADLE PROJECT:`
-
-#### Templates of Dockerfile-Gradle and docker-compose-gradle
-
-[Dockerfile-Gradle](./Dockerfile-Gradle)
-
-```dockerfile-gradle
-FROM openjdk:11
-
-WORKDIR /app
-
-COPY gradle gradle
-COPY gradlew build.gradle ./
-COPY src ./src
-
-RUN ./gradlew clean build -x test
-
-CMD ["./gradlew", "bootRun"]
-```
-
-[docker-compose-gradle.yml](./docker-compose-gradle.yml)
-
-Below is the template of your docker-compose-gradle.yml.
-
-```yaml
-version: '3.8'
-services:
-  spring-boot-postgres:
-    image: spring-boot-postgres-image
-    container_name: spring-boot-postgres-gradle-container
-    networks:
-      - spring-boot-postgres-network
-    build:
-      context: .
-      dockerfile: Dockerfile-Gradle
-    env_file: .env
-    depends_on:
-      - db
-    ports:
-      - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
-      - ${DEBUG_PORT_ON_DOCKER_HOST}:${DEBUG_PORT_ON_CONTAINER}
-    volumes:
-      - ./:/app
-    command: ./gradlew bootRun
 
   db:
     container_name: postgres-container
@@ -231,117 +250,24 @@ volumes:
 networks:
   spring-boot-postgres-network:
 ```
-
-Here each service acts as a new container. Since our application is dependent on `db` service, we need
+Here each service acts as a new container. Since our application is dependent on `db` service, we
+need
 to take care of a few things:
 
 - `spring-boot-postgres` service shouldn't start before `db` service. And that is why we
   used `depends_on` property under `spring-boot-postgres`.
-- `spring-boot-postgres` service and `db` both have to be on the same network, so that they
+- `spring-boot-postgres` and `db` services both have to be on the same network, so that they
   can communicate with each other. If we don't provide any network to services, they might run in
-  isolated networks which leads to communication link failure between the application and the database.
-- Finally, for hot reloading of the app inside docker, our current directory(where the source code exists)
-  should be mounted to the working directory inside the container.
+  isolated networks which leads to communication link failure between the application and the
+  database.
+- Finally, for hot reloading of the app inside docker, our current directory(where the source code
+  exists) should be mounted to the working directory inside the container.
 
 ```yaml
     volumes:
       - ./:/app
 ```
 
-### Step-3:
-
-In the `docker-compose.yml` and `docker-compose-gradle.yml` files, you would see that the variables used
-like `${APPLICATION_PORT_ON_DOCKER_HOST}`, `${APPLICATION_PORT_ON_CONTAINER}`,  
-and `${DB_PORT_ON_CONTAINER}`. One might think(people new to docker) how do we pass values
-to
-these variables? Well, there are different ways to do that, one of them is by defining under
-the `environment` property of any service. Another way is to
-define all these values
-inside [.env](./.env).
-
-Here, we'll be using `.env` file to pass values to these variables.
-
-Create a [`.env`](./.env) file inside the working directory.
-
-Then the project structure is:
-
-`FOR MAVEN PROJECT:`
-```
-<working-dir>
-├── ...
-├── src
-|     └── ...
-├── .env
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
-```
-
-`FOR GRADLE PROJECT:`
-
-```
-<working-dir>
-├── ...
-├── src
-|     └── ...
-├── .env
-├── Dockerfile-Gradle
-├── docker-compose-gradle.yml
-└── README.md
-```
-
-
-Replace the content of the newly created `.env` file with this [.env](./.env) file.
-
-### Step-4:
-
-Follow the commands to run docker-compose file
-
-1. Change the directory in Terminal or CMD to `<working-dir>`
-
-> $ cd `<PATH-TO-WORKING-DIR>`
-
-2. Run the `docker-compose.yml` file in case of a maven application or `docker-compose-gradle.yml` file in case of a Gradle application.
-
-`IN CASE OF A MAVEN APPLICATION:`
-> $ docker-compose up
-
-After doing this you may following error:
-
-![intellij-setting](./src/main/resources/images/mvnwerror.png)
-
-To solve this issue, execute the following command:
-
-> chmod u+x ./mvnw
-
-The issue will be solved. Again do a `docker-compose up`
-
-`IN CASE OF A GRADLE APPLICATION:`
-> docker-compose -f docker-compose-gradle.yml up
-
-
-
-If you're running `docker-compose up` command for the first time, it may take up to 7-10 minutes to pull
-image(
-openjdk:11) and download dependencies. If everything runs successfully, by doing `docker ps` you
-would see a similar outcome as shown below.
-
-```
-➜  student-grading-micronaut ✗ docker ps
-CONTAINER ID   IMAGE                             COMMAND                  CREATED          STATUS          PORTS                                            NAMES
-8247f3b42566   spring-boot-postgres-image        "./mvnw spring-boot:…"   29 seconds ago   Up 25 seconds   0.0.0.0:8080->8080/tcp   student-grading-micronaut-app
-04a7dbf0c0e3   postgres:14.1-alpine              "docker-entrypoint.s…"   4 minutes ago    Up 4 minutes    5432/tcp                 student-grading-db
-```
-
-If the application failed to start, you can still figure out why it fails by executing the below command:
-> $ docker logs --follow `<container-name>`
-
-Take action according to the logs.
-
-Now, while the application is up and running inside docker, make the changes to the code base, then you
-would that application running inside docker should restart automatically.
-
-You can also set a debug point, and hit an API that goes to that debug point using Postman, you can see you'll be redirected to IntelliJ and debug your code.
 
 ## How to run E2E tests inside docker?
 

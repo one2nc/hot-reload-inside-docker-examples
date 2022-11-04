@@ -5,144 +5,217 @@
     A sample Micronaut application to set up fast local development with hot reload inside docker.
     We will use Maven and Gradle as the build tools for our application.
 
-## Outcome
+## Micronaut + Postgres + Maven / Gradle + Docker
 
-By doing `docker-compose up` inside the working directory you should be able to run the Micronaut
-application. The app is compiled in docker. Your code changes will be automatically compiled and hot reloaded without
-having to restart the app or docker container.
-
-
-### Micronaut + Postgres + Docker
+## Run Application Inside Docker
 
 ### Step-1:
-`FOR MAVEN PROJECTS:`
-- Add `Dockerfile` and `docker-compose.yml` files to the working directory. Then the
-  project structure would be as shown below.
+
+Ensure working of hot reload in local machine. For a micronaut application it's pretty straight
+forward i.e, we don't need to add any dependency or plugin, just need to run the __maven/gradle__
+command inside working directory:
+
+__Maven__:
+
+````
+./mvnw mn:run
+````
+
+__Gradle:__
+
+```
+./gradlew run -t
+```
+
+Here `-t` enable continuous build that means gradle should re-build the project if any changes
+triggered in __src__ directory.
+
+__Maven / Gradle:__
+While application is running, change code base by adding some `System.out.println` statement and
+save the changes. Then the changes should be auto-compiled and updated without having to
+restart the application(hot reload).
+
+### Step-2:
+
+
+Create `Dockerfile`, `docker-compose.yml` and `.env`(used to pass values to variables used inside
+docker-compose.yml) inside the working directory.
+
+Then project structure is:
 
 ```
 <working-dir>
 ├── ...
 ├── src
 |     └── ...
+├── .env
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
 ```
 
-Now, copy the content from the template  `Dockerfile` and `docker-compose.yml` files provided below and paste it into newly
+__Maven:__
+
+- [Dockerfile](./Dockerfile)
+- [docker-compose.yml](./docker-compose.yml)
+- [.env](./.env)
+
+__Gradle:__
+
+- [Dockerfile](./Dockerfile-Gradle)
+- [docker-compose.yml](./docker-compose-gradle.yml)
+- [.env](./.env)
+
+Now, copy the content from `Dockerfile`, `docker-compose.yml`
+and `.env` files (based on build tool) to newly
 created __Dockerfile__ and __docker-compose.yml__ files in your project.
 
-`FOR GRADLE PROJECT:`
-- Add `Dockerfile-Gradle` and `docker-compose-gradle.yml` to the working directory.
+### Step-3:
 
-```
-<working-dir>
-├── ...
-├── src
-|     └── ...
-├── Dockerfile-Gradle
-├── docker-compose-gradle.yml
-└── README.md
-```
+Make appropriate changes in `docker-compose.yml` and `.env` like:
 
-### Template for Dockerfile and docker-compose.yml files
+__docker-compose.yml:__
 
-`FOR MAVEN PROJECT:`
-
-[Dockerfile](./Dockerfile)
-
- ```dockerfile
-FROM openjdk:11
-
-WORKDIR /app
-
-COPY .mvn .mvn
-COPY mvnw pom.xml ./
-RUN ./mvnw -T 4 dependency:go-offline
-
-COPY src ./src
-
-CMD ["./mvnw", "mn:run", "-Dmn.watch=true"]
- ```
-
-[docker-compose.yml](./docker-compose.yml)
-
- ```yaml
+```yaml
 version: '3.8'
 services:
-  micronaut-postgres:
-    image: micronaut-postgres-image
-    container_name: micronaut-postgres-container
-    networks:
-      - micronaut-postgres-network
-    build:
-      context: .
-    env_file: .env
-    depends_on:
-      - db
-    ports:
-      - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
-    volumes:
-      - ./:/app
-    command: ./mvnw mn:run
+  spring-boot-postgres-maven:
+    image: <your-image-name>
+    container_name: <your-container-name>
+  ....
+```
 
-  db:
-    container_name: student-grading-db
-    image: postgres:14.1-alpine
-    env_file: .env
-    environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports:
-      - ${DB_PORT_ON_DOCKER_HOST}:${DB_PORT_ON_CONTAINER}
-    volumes:
-      - db:/var/lib/postgresql/data
-    networks:
-      - student-grading-network
+__.env:__
+
+```
+...
+DB_NAME=<your-db-name>
+...
+```
 
 
-volumes:
-  db:
+### Step-4:
 
-networks:
-  student-grading-network:
+__Maven/Gradle:__
 
- ```
+Now, run the application inside docker:
 
+Simply do `docker-compose up` inside working directory
+> $ docker-compose up
 
-`FOR GRADLE PROJECT:`
+Then you may get error like `permission denied exception for ./mvnw file`
+or `permission denied exception for ./gradlew file`
 
-[Dockerfile-Gradle](./Dockerfile-Gradle)
+To solve this issue, execute the command:
 
-```dockerfile
-FROM openjdk:11
+> chmod u+x ./mvnw
 
-WORKDIR /app
+Similarly, for gradle do `chmod u+x ./graldew`
 
-COPY gradle gradle
-COPY gradlew build.gradle gradle.properties ./
-COPY src ./src
+Again do a `docker-compose up`, this time you don't get any errors but
+for the first build it may take up to 7-10 minutes to pull
+images(openjdk:11 and postgres:14.1-alpine) and download dependencies. If everything runs
+successfully, by doing `docker ps` you
+would see a similar outcome(image and container names may differ) for __maven / gradle__:
 
-RUN ./gradlew clean build -x test
+```
+➜ micronaut-postgres ✗ docker ps
+CONTAINER ID   IMAGE                             COMMAND                  CREATED             STATUS             PORTS                                            NAMES
+c30ca301b5dd   micronaut-postgres-image         "./gradlew run -t"       About an hour ago   Up About an hour   0.0.0.0:8000->8000/tcp, 0.0.0.0:8080->8080/tcp   micronaut-postgres-container
+263e83e4296f   postgres:14.1-alpine              "docker-entrypoint.s…"   About an hour ago   Up About an hour   0.0.0.0:5432->5432/tcp                           postgres-container
 
-CMD ["./gradlew", "run", "-t"]
+```
 
- ```
+Now, while the application is up and running inside docker, make the changes to the code base, then
+you would see that application running inside docker should restart automatically.
+## Debugging
 
-[docker-compose-gradle.yml](./docker-compose.yml)
+### Maven:
+
+Logs inside docker after doing `docker-compose up`:
+
+```
+.......
+micronaut-postgres-container  | Listening for transport dt_socket at address: 8000
+micronaut-postgres-container  |  __  __ _                                  _   
+micronaut-postgres-container  | |  \/  (_) ___ _ __ ___  _ __   __ _ _   _| |_ 
+micronaut-postgres-container  | | |\/| | |/ __| '__/ _ \| '_ \ / _` | | | | __|
+micronaut-postgres-container  | | |  | | | (__| | | (_) | | | | (_| | |_| | |_ 
+micronaut-postgres-container  | |_|  |_|_|\___|_|  \___/|_| |_|\__,_|\__,_|\__|
+micronaut-postgres-container  |   Micronaut (v3.7.2)
+.......
+```
+
+If you observe the log `Listening for transport dt_socket at address: 8000`, that means application
+is running in debug mode at port 8000 inside docker.
+
+Application is running in debug mode because of command inside docker-compose:
+
+__docker-compose.yml__
+
+```yaml
+...
+command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
+...
+```
+
+### Gradle:
+
+In case of gradle to run application in debug mode add `run` task to `build.gradle`:
+
+__run task__:
+
+```
+run {
+	jvmArgs=["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000"]
+}
+```
+
+After that do `docker-compose up` inside working directory, then the logs inside docker is:
+
+```
+...
+micronaut-postgres-container  | Starting a Gradle Daemon, 1 incompatible and 1 stopped Daemons could not be reused, use --status for details
+micronaut-postgres-container  | > Task :compileJava UP-TO-DATE
+micronaut-postgres-container  | > Task :processResources UP-TO-DATE
+micronaut-postgres-container  | > Task :classes UP-TO-DATE
+micronaut-postgres-container  | 
+micronaut-postgres-container  | > Task :run
+micronaut-postgres-container  | Listening for transport dt_socket at address: 8000
+micronaut-postgres-container  |  __  __ _                                  _   
+micronaut-postgres-container  | |  \/  (_) ___ _ __ ___  _ __   __ _ _   _| |_ 
+micronaut-postgres-container  | | |\/| | |/ __| '__/ _ \| '_ \ / _` | | | | __|
+micronaut-postgres-container  | | |  | | | (__| | | (_) | | | | (_| | |_| | |_ 
+micronaut-postgres-container  | |_|  |_|_|\___|_|  \___/|_| |_|\__,_|\__,_|\__|
+micronaut-postgres-container  |   Micronaut (v3.7.2)
+
+.....
+```
+
+If you observe the log `Listening for transport dt_socket at address: 8000`, that means application
+is running in debug mode at port 8000 inside docker.
+
+__Maven / Gradle__:
+
+Inside __jvmArgs__ we have used the property `address=*:8000` which tells from where we should
+attach debugger. Here `*` is
+placed in place of __host__ that means we can attach to debugger from any host within the same
+network.
+
+Then follow steps in [Remote Debugging Using IntelliJIDEA](https://github.com/one2nc/hot-reload-inside-docker-examples/blob/master/README.md#remote-debugging-using-intellijidea) to attach a debugger.
+
+## Details About Docker-Compose File
 
 ```yaml
 version: '3.8'
 services:
   micronaut-postgres:
-    image: micronaut-postgres-image
-    container_name: micronaut-postgres-container
+    image: micronaut-postgres-maven-image
+    container_name: micronaut-postgres-maven-container
     networks:
-      - micronaut-postgres-network
+      - student-grading-network
     build:
       context: .
-      dockerfile: Dockerfile-Gradle
     env_file: .env
     depends_on:
       - db
@@ -151,7 +224,7 @@ services:
       - ${DEBUG_PORT_ON_DOCKER_HOST}:${DEBUG_PORT_ON_CONTAINER}
     volumes:
       - ./:/app
-    command: ./gradlew run -t
+    command: ./mvnw mn:run -Dmn.debug -Dmn.debug.host=* -Dmn.debug.port=${DEBUG_PORT_ON_CONTAINER}
 
   db:
     container_name: postgres-container
@@ -162,89 +235,33 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     networks:
-      - micronaut-postgres-network
-
+      - student-grading-network
 
 volumes:
   db:
 
 networks:
-  micronaut-postgres-network:
+  student-grading-network:
 ```
 
-
-
-
-Here each service acts as a new container. Since our application is dependent on `db` service, We need
-to take care of a few things like -
+Here each service acts as a new container. Since our application is dependent on `db` service, we
+need
+to take care of a few things:
 
 - `micronaut-postgres` service shouldn't start before `db` service. And that is why we
-  used `depend_on` property under `micronaut-postgres`.
-- `micronaut-postgres` service and `db` both have to in the same network, so that they
+  used `depends_on` property under `micronaut-postgres`.
+- `micronaut-postgres` and `db` services both have to be on the same network, so that they
   can communicate with each other. If we don't provide any network to services, they might run in
-  isolated networks which leads to communication link failure between the application and database.
-- Finally, for hot reload to happen inside docker, our current directory(where the source code exists)
-  should be mounted to the working directory inside the container.
+  isolated networks which leads to communication link failure between the application and the
+  database.
+- Finally, for hot reloading of the app inside docker, our current directory(where the source code
+  exists) should be mounted to the working directory inside the container.
 
 ```yaml
-volumes:
-  - ./:/app
+    volumes:
+      - ./:/app
 ```
 
-### Step-2:
-
-### How to pass values to variables in `docker-compose.yml` and `docker-compose-gradle.yml` file?
-
-In the `docker-compose.yml` and `docker-cmompose-gradle.yml` files, you would see that the variables are used
-like `${APPLICATION_PORT_ON_DOCKER_HOST}`, `${APPLICATION_PORT_ON_CONTAINER}`,  
-`${DB_NAME}`, `${POSTGRES_USER}`, `${POSTGRES_PASSWORD}`, `${DB_PORT_ON_DOCKER_HOST}`
-and `${DB_PORT_ON_CONTAINER}`. One might think(people new to docker) that how would we pass values
-to
-these variables? Well there are a couple of ways to do that, one is by defining under
-the `environment` property of any service(example to refer, under `db` service). Another way is to
-define all these values
-inside [.env](./.env)
-file, and then map it to the service with the property `env_file` as we did in
-both `micronaut-postgres` and `db` services.
-
-
-### Step-3:
-
-### How to run docker-compose file?
-
-Follow the commands to run docker-compose file
-
-1. Change directory in Terminal or CMD to `<working-dir>`
-
-> $ cd `<PATH-TO-WORKING-DIR>`
-
-2. Run the `docker-compose.yml` or `docker-compose-gradle.yml` files depending on the build tool you are using i.e Maven or Gradle.
-
-`IN CASE OF MAVEN APPLICATION:`
-
-> $ docker-compose up
-
-`IN CASE OF GRADLE APPLICATION:`
-
-> $ docker-compose -f docker-compose-gradle.yml up
-
-
-If you're running `docker-compose up` command for the first time, it would take 7-10 minutes to pull
-images(
-openjdk:11) and downloading dependencies. If everything runs successfully, by doing `docker ps` you
-would see the following outcome.
-
-```
-➜  student-grading-micronaut ✗ docker ps
-CONTAINER ID   IMAGE                             COMMAND                  CREATED          STATUS          PORTS                                            NAMES
-8247f3b42566   micronaut-postgres-image          "./mvnw mn:run -Dmn.…"   29 seconds ago   Up 25 seconds   0.0.0.0:8080->8080/tcp           student-grading-micronaut-app
-04a7dbf0c0e3   postgres:14.1-alpine              "docker-entrypoint.s…"   4 minutes ago    Up 4 minutes    5432/tcp                         student-grading-db
-```
-
-If the application fails to start, you would still figure out why it fails by the below command.
-> docker logs --follow <container-name>
-
-Make actions according to the logs.
 
 ## How to run E2E tests inside docker?
 
