@@ -49,7 +49,7 @@ created __Dockerfile__ and __docker-compose.yml__ files in your project.
 
 `FOR MAVEN PROJECT:`
 
-[Dockerfile](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/Dockerfile)
+[Dockerfile](./Dockerfile)
 
  ```dockerfile
 FROM openjdk:11
@@ -65,7 +65,7 @@ COPY src ./src
 CMD ["./mvnw", "mn:run", "-Dmn.watch=true"]
  ```
 
-[docker-compose.yml](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/docker-compose.yml)
+[docker-compose.yml](./docker-compose.yml)
 
  ```yaml
 version: '3.8'
@@ -113,7 +113,7 @@ networks:
 
 `FOR GRADLE PROJECT:`
 
-[Dockerfile-Gradle](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/Dockerfile-Gradle)
+[Dockerfile-Gradle](./Dockerfile-Gradle)
 
 ```dockerfile
 FROM openjdk:11
@@ -130,7 +130,7 @@ CMD ["./gradlew", "run", "-t"]
 
  ```
 
-[docker-compose-gradle.yml](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/docker-compose.yml)
+[docker-compose-gradle.yml](./docker-compose.yml)
 
 ```yaml
 version: '3.8'
@@ -203,7 +203,7 @@ to
 these variables? Well there are a couple of ways to do that, one is by defining under
 the `environment` property of any service(example to refer, under `db` service). Another way is to
 define all these values
-inside [.env](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/.env)
+inside [.env](./.env)
 file, and then map it to the service with the property `env_file` as we did in
 both `micronaut-postgres` and `db` services.
 
@@ -265,7 +265,7 @@ Adding `docker-compose-test.yml` file would help to run the test inside docker. 
 └── README.md
 ```
 
-[docker-compose-test.yml](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/docker-compose-test.yml)
+[docker-compose-test.yml](./docker-compose-test.yml)
 
 ```yaml
 version: '3.8'

@@ -362,7 +362,7 @@ Adding `docker-compose-test.yml` file helps us in running tests inside docker. T
 └── README.md
 ```
 
-[docker-compose-test.yml](https://github.com/chinmaysomani07/student-grading-micronaut/blob/dockerise-setup/docker-compose-test.yml)
+[docker-compose-test.yml](./docker-compose-test.yml)
 
 ```yaml
 version: '3.8'
