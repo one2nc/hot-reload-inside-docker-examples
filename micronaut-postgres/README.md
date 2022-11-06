@@ -11,9 +11,9 @@
 
 ### Step-1:
 
-Ensure working of hot reload in local machine. For a micronaut application it's pretty straight
+Ensure the working of hot reload in the local machine. For a micronaut application, it's pretty straight
 forward i.e, we don't need to add any dependency or plugin, just need to run the __maven/gradle__
-command inside working directory:
+command inside the working directory:
 
 __Maven__:
 
@@ -27,21 +27,21 @@ __Gradle:__
 ./gradlew run -t
 ```
 
-Here `-t` enable continuous build that means gradle should re-build the project if any changes
+Here `-t` enable continuous build which means Gradle should re-build the project if there are any changes
 triggered in __src__ directory.
 
 __Maven / Gradle:__
-While application is running, change code base by adding some `System.out.println` statement and
+While the application is running, change the code base by adding some `System.out.println` statement/statements and
 save the changes. Then the changes should be auto-compiled and updated without having to
 restart the application(hot reload).
 
 ### Step-2:
 
 
-Create `Dockerfile`, `docker-compose.yml` and `.env`(used to pass values to variables used inside
+Create `Dockerfile`, `docker-compose.yml`, and `.env`(used to pass values to variables used inside
 docker-compose.yml) inside the working directory.
 
-Then project structure is:
+The project structure after this looks like:
 
 ```
 <working-dir>
@@ -100,20 +100,20 @@ __Maven/Gradle:__
 
 Now, run the application inside docker:
 
-Simply do `docker-compose up` inside working directory
+Simply do `docker-compose up` inside the working directory
 > $ docker-compose up
 
-Then you may get error like `permission denied exception for ./mvnw file`
+Then you may get an error like `permission denied exception for ./mvnw file`
 or `permission denied exception for ./gradlew file`
 
 To solve this issue, execute the command:
 
 > chmod u+x ./mvnw
 
-Similarly, for gradle do `chmod u+x ./graldew`
+Similarly, for Gradle do `chmod u+x ./graldew`
 
 Again do a `docker-compose up`, this time you don't get any errors but
-for the first build it may take up to 7-10 minutes to pull
+for the first build, it may take up to 7-10 minutes to pull
 images(openjdk:11 and postgres:14.1-alpine) and download dependencies. If everything runs
 successfully, by doing `docker ps` you
 would see a similar outcome(image and container names may differ) for __maven / gradle__:
@@ -127,7 +127,7 @@ c30ca301b5dd   micronaut-postgres-image         "./gradlew run -t"       About a
 ```
 
 Now, while the application is up and running inside docker, make the changes to the code base, then
-you would see that application running inside docker should restart automatically.
+you would see that the application running inside docker should restart automatically.
 ## Debugging
 
 ### Maven:
@@ -146,10 +146,10 @@ micronaut-postgres-container  |   Micronaut (v3.7.2)
 .......
 ```
 
-If you observe the log `Listening for transport dt_socket at address: 8000`, that means application
+If you observe the log `Listening for transport dt_socket at address: 8000`, that means the application
 is running in debug mode at port 8000 inside docker.
 
-Application is running in debug mode because of command inside docker-compose:
+The application is running in debug mode because of the command inside docker-compose:
 
 __docker-compose.yml__
 
@@ -161,17 +161,17 @@ command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=t
 
 ### Gradle:
 
-In case of gradle to run application in debug mode add `run` task to `build.gradle`:
+In case of Gradle to run the application in debug mode add `run` task to `build.gradle`:
 
 __run task__:
 
 ```
 run {
-	jvmArgs=["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000"]
+   jvmArgs=["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000"]
 }
 ```
 
-After that do `docker-compose up` inside working directory, then the logs inside docker is:
+After that do `docker-compose up` inside the working directory, then the logs inside docker are:
 
 ```
 ...
@@ -192,17 +192,17 @@ micronaut-postgres-container  |   Micronaut (v3.7.2)
 .....
 ```
 
-If you observe the log `Listening for transport dt_socket at address: 8000`, that means application
+If you observe the log `Listening for transport dt_socket at the address: 8000`, that means the application
 is running in debug mode at port 8000 inside docker.
 
 __Maven / Gradle__:
 
 Inside __jvmArgs__ we have used the property `address=*:8000` which tells from where we should
-attach debugger. Here `*` is
-placed in place of __host__ that means we can attach to debugger from any host within the same
+attach a debugger. Here `*` is
+placed in the place of __host__ which means we can attach to the debugger from any host within the same
 network.
 
-Then follow steps in [Remote Debugging Using IntelliJIDEA](https://github.com/one2nc/hot-reload-inside-docker-examples/blob/master/README.md#remote-debugging-using-intellijidea) to attach a debugger.
+Then follow the steps in [Remote Debugging Using IntelliJIDEA](https://github.com/one2nc/hot-reload-inside-docker-examples/blob/master/README.md#remote-debugging-using-intellijidea) to attach a debugger.
 
 ## Details About Docker-Compose File
 
@@ -305,8 +305,8 @@ services:
     command: mvn clean test
 ```
 
-Here `~/.m2` is specific to mac, if you're using different platform, replace `~/.m2`
-with `C:\Users\{your-username}\.m2` for windows or `/root/.m2` for linux.
+Here `~/.m2` is specific to mac, if you're using a different platform, replace `~/.m2`
+with `C:\Users\{your-username}\.m2` for windows or `/root/.m2` for Linux.
 
 
 
@@ -326,5 +326,3 @@ in `pom.xml`.
 Once the dependencies are mounted or downloaded, you would see the following logs as a good sign -
 
 ![Test-Logs](./src/main/resources/images/docker-compose-test-logs.png)
-
-
