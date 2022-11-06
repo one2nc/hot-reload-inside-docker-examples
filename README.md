@@ -27,7 +27,7 @@ Micronaut application with the following features:
 ## Running the application
 
 The root directory of each application, i.e SpringBoot and Micronaut contains a `docker-compose.yml` file which describes the
-configuration of service components. All samples can be run in a local environment by going into the
+configuration of service components. All the samples can be run in a local environment by going into the
 root directory of the application and executing the following command:
 
 ```yaml
@@ -52,28 +52,28 @@ docker compose down
 
 The essential component is __mounting__ current directory from local machine to `app`(WORKDIR)
 directory
-inside Docker container. SpringBoot / Micronaut application by default comes with Maven / Gradle
-Wrappers, this would allow us to run the application within Docker container.
+inside the Docker container. SpringBoot / Micronaut application by default comes with Maven / Gradle
+Wrappers, this would allow us to run the application within the Docker container.
 
 ### Gradle / Maven Dependency Caching
 
-Mounting current directory into Docker container helps to have source code and the
+Mounting the current directory into the Docker container helps to have source code and the
 build tool within Docker container, but the source code within Docker is dependent on many external
-libraries(dependencies) which are not present in current directory.
+libraries(dependencies) that are not present in the current directory.
 
 There are two ways to solve this issue:
 
 - Mounting `.m2` / `.gradle` from Docker Host to Docker container.
 - Caching all the dependencies while building the Docker image
 
-Mounting root level directories is not an option to choose. But there are some other issue with
+Mounting root-level directories is not an option to choose. But there are some other issues with
 Gradle
 caching, if you are mounting `.gradle` and running the application with Gradle build tool within
-Docker container, then docker acquires lock for gradle cache, that means we
-can't run any application with Gradle build in local machine until Docker container is stopped.
+Docker container, then docker acquires the lock for Gradle cache, which means we
+can't run any application with Gradle build in the local machine until the Docker container is stopped.
 
-Caching all the dependencies while building Docker image is a good option during development phase.
-Since we are downloading all the dependencies image size would be larger(depends on dependencies).
+Caching all the dependencies while building a Docker image is a good option during the development phase.
+Since we are downloading all the dependencies image size would be larger(depends on the dependencies).
 
 
 ## Remote Debugging Using IntelliJIDEA
