@@ -1,0 +1,11 @@
+FROM --platform=$BUILDPLATFORM maven:3.8.5-eclipse-temurin-17 AS base
+WORKDIR /app
+COPY ./pom.xml .
+RUN mvn -T 4 dependency:go-offline
+COPY ./src ./src
+RUN mvn clean install -DskipTests=true
+
+
+FROM openjdk:11-jre-slim
+COPY --from=base /app/target/student-grading-*.jar /app/student-grading-micronaut.jar
+CMD ["java", "-jar", "/app/student-grading-micronaut.jar"]

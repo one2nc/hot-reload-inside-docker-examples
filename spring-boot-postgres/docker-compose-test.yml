@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+
+  tests:
+    image: maven:3
+    stop_signal: SIGKILL
+    stdin_open: true
+    tty: true
+    working_dir: /app
+    environment:
+      - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
+    volumes:
+      - ./:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Maven cache (optional), if .m2 repository isn't mounted, maven will download all
+      # the dependencies mentioned in 'pom.xml' from mvn central repository.
+      # Here `~/.m2` is specific to mac, If you're using different platform,
+      # Replace `~/.m2` with `C:\Users\{your-username}\.m2` for windows or `/root/.m2` for linux.
+      - ~/.m2:/root/.m2
+    command: mvn clean test

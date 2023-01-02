@@ -1,0 +1,28 @@
+datasources:
+  default:
+    url: jdbc:tc:postgresql:14.1-alpine:///test
+    driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
+
+testcontainers:
+  reuse:
+    enable: true
+
+jpa.default.properties.hibernate.hbm2ddl.auto: none
+
+liquibase:
+  enabled: true
+  datasources:
+    default:
+      change-log: 'classpath:db/liquibase-changelog.xml'
+
+micronaut:
+  http:
+    client:
+      exception-on-error-status: false
+
+netty:
+  default:
+    allocator:
+      max-order: 3
