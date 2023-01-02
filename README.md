@@ -19,9 +19,9 @@ Micronaut application with the following features:
 
 ## Samples of Hot Reload Inside Docker application with multiple integrated services
 
-- [`Spring-Boot / Postgres`](https://github.com/RamanaReddy0M/hot-reload-inside-docker-examples/tree/master/spring-boot-postgres)
+- [`Spring-Boot / Postgres`](./spring-boot-postgres/)
   - Sample Java application with SpringBoot Framework and a Postgres database.
-- [`Micronaut / Postgres`](https://github.com/RamanaReddy0M/hot-reload-inside-docker-examples/tree/master/micronaut-postgres)
+- [`Micronaut / Postgres`](./micronaut-postgres/)
   - Sample Java application with Micronaut Framework and a Postgres database.
 
 ## Running the application

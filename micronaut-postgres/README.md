@@ -202,7 +202,7 @@ attach a debugger. Here `*` is
 placed in the place of __host__ which means we can attach to the debugger from any host within the same
 network.
 
-Then follow the steps in [Remote Debugging Using IntelliJIDEA](https://github.com/one2nc/hot-reload-inside-docker-examples/blob/master/README.md#remote-debugging-using-intellijidea) to attach a debugger.
+Then follow the steps in [Remote Debugging Using IntelliJIDEA](https://github.com/one2nc/hot-reload-inside-docker-examples/blob/main/README.md#remote-debugging-using-intellijidea) to attach a debugger.
 
 ## Details About Docker-Compose File
 
